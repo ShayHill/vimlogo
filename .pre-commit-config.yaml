@@ -1,0 +1,143 @@
+
+ci:
+  skip: [pyright]
+
+exclude: "tests"
+
+repos:
+
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.5.0
+  hooks:
+    - id: check-added-large-files
+    - id: check-ast
+    - id: check-case-conflict
+    - id: check-docstring-first
+    - id: check-executables-have-shebangs
+    - id: check-json
+    - id: check-merge-conflict
+      args:
+        - --assume-in-merge
+    - id: check-shebang-scripts-are-executable
+    - id: check-symlinks
+    - id: check-toml
+    - id: check-vcs-permalinks
+    - id: check-xml
+    - id: check-yaml
+    - id: debug-statements
+    - id: destroyed-symlinks
+    - id: detect-private-key
+    - id: end-of-file-fixer
+    - id: mixed-line-ending
+    - id: requirements-txt-fixer
+    - id: trailing-whitespace
+    - id: fix-encoding-pragma
+      args:
+      - --remove
+    - id: name-tests-test
+      args:
+      - --pytest-test-first
+    - id: no-commit-to-branch
+    - id: pretty-format-json
+      args: ['--autofix']
+    # - id: sort-simple-yaml
+        # files: .pre-commit-config.yaml
+
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.8.0
+  hooks:
+  - id: mypy
+    name: mypy
+    language: python
+    language_version: python 3.12
+    types: [python]
+    require_serial: true
+    verbose: true
+    additional_dependencies: ['types-requests']
+    # exclude: "tests"
+    # args:
+    # - --ignore-missing-imports
+    # files: ^(src/|tests/)
+
+- repo: https://github.com/PyCQA/isort
+  rev: 5.13.2
+  hooks:
+  - id: isort
+    args: ["--profile", "black", "--filter-files", "--combine-as", "honor--noqa"]
+
+- repo: https://github.com/psf/black
+  rev: 23.12.1
+  hooks:
+  - id: black
+    language_version: python3.10
+    args: ["--skip-magic-trailing-comma"]
+
+- repo: https://github.com/asottile/pyupgrade
+  rev: v3.15.0
+  hooks:
+  - args:
+    - --py310-plus
+    id: pyupgrade
+
+- repo: https://github.com/Lucas-C/pre-commit-hooks
+  rev: v1.5.4
+  hooks:
+  - id: remove-tabs
+
+# - repo: https://github.com/commitizen-tools/commitizen
+#   rev: v2.40.0
+#   hooks:
+#   - id: commitizen
+
+# pylint still broken in python 3.12
+# - repo: https://github.com/pre-commit/mirrors-pylint
+#   rev: v3.0.0a5
+#   hooks:
+#   - id: pylint
+#     exclude: "tests"
+#     name: pylint
+#     args:
+#     - --good-names=i,j,_,f
+#     - --disable=protected-access
+#     - --disable=no-member
+#     - --disable=import-error
+#     - --disable=no-name-in-module
+#     - --load-plugins=pylint.extensions.docparams
+#     - --accept-no-param-doc=n
+#     - --accept-no-raise-doc=n
+#     - --accept-no-return-doc=n
+#     - --accept-no-yields-doc=n
+
+- repo: https://github.com/charliermarsh/ruff-pre-commit
+  # ignores
+  # ANN101 Missing type annotation for self in method
+  # ANN102 Missing type annotation for cls in classmethod
+  # ANN201 Missing return type annotation for public function
+  # ANN202 Missing return type annotation for private function (wants -> None everywhere)
+  # B905 zip() without an explicit strict= parameter
+  # COM812 Trailing comma missing
+  # D203 1 blank line required before class docstring
+  # D213 multi line summary second line
+  # D400 first line should end with a period
+  # I001 Import block is un-sorted or un-formatted
+  # ISC003 Explicitly concatenated string should be implicitly concatenated
+  # N802 Function name should be lowercase
+  # N806 Variable in function should be lowercase
+  # PERF401 Use a list comprehension to create a transformed list
+  # PGH003 Use specific rule codes when ignoring type issues
+  # PLR0913 Too many arguments to function call
+  rev: 'v0.1.9'
+  hooks:
+    - id: ruff
+      exclude: "tests"
+      args:
+      - --target-version=py311
+      - --select=ALL
+      - --ignore=ANN101,ANN102,ANN201,ANN202,B905,COM812,D203,D213,D400,I001,ISC003,N802,N806,PERF401,PGH003,PLR0913
+      # - --fix
+
+# reads pyproject.toml for additional config
+- repo: https://github.com/RobertCraigie/pyright-python
+  rev: v1.1.343
+  hooks:
+    - id: pyright

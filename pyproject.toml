@@ -1,0 +1,53 @@
+
+[project]
+name = "vim_logo"
+version = "0.1.0"
+description = "The classic Vim logo with 'correct' bevels."
+authors = [{ name = "Shay Hill", email = "shay_public@hotmail.com" }]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["basic_colormath", "offset_poly", "svg_ultralight", "vec2_math" ]
+
+[project.optional-dependencies]
+dev = ["commitizen", "pre-commit", "pytest", "tox"]
+
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.1.0"
+tag_format = "$version"
+major-version-zero = true
+version_files = ["pyproject.toml:^version"]
+
+
+
+[tool.isort]
+profile = "black"
+
+
+
+[tool.pyright]
+include = ["src"]
+exclude = ["**/__pycache__.py"]
+
+pythonVersion = "3.10"
+pythonPlatform = "Any"
+
+typeCheckingMode = "strict"
+reportShadowedImports = true
+reportCallInDefaultInitializer = true
+reportImplicitStringConcatenation = true
+# reportMissingSuperCall = true
+reportPropertyTypeMismatch = true
+reportUninitializedInstanceVariable = true
+reportUnnecessaryTypeIgnoreComment = true
+reportUnusedCallResult = true
+
+venvPath = "."
+venv = "./venv"
