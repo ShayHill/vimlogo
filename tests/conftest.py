@@ -1,4 +1,3 @@
- "boilerplate for conftest" b
 """See full diffs in pytest.
 
 :author: Shay Hill
