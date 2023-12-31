@@ -16,6 +16,8 @@ from typing import TYPE_CHECKING
 
 import svg_ultralight as su
 
+from vim_logo.glyphs import new_data_string
+
 if TYPE_CHECKING:
     from lxml.etree import _Element as EtreeElement  # type: ignore
 
@@ -82,7 +84,7 @@ def _skew_point(pt: tuple[float, float]) -> tuple[float, float]:
 
 # the top of an m curve all the way to the start of the next curve. There are two and
 # a half of these in the letter m.
-curved_top = [
+_curved_top = [
     (_STROKE_BOT - _BEVEL, _H_LINES[2]),
     (_BEVEL, _H_LINES[3]),
     (_M_VOID - _BEVEL * 2, _H_LINES[3]),
@@ -93,7 +95,7 @@ curved_top = [
 # leg. There are two and a half of these in the letter m. This is also used as a
 # transformation to get from a known point on the letter m to a new point on the stem
 # of the letter i.
-bottom_leg = [
+_bottom_leg = [
     (_BEVEL, _H_LINES[5]),
     (0, _H_LINES[6]),
     (-_STROKE_BOT, _H_LINES[6]),
@@ -106,140 +108,74 @@ bottom_leg = [
 #   Letter m full path
 # ===============================================================================
 
-letter_m_pts = [
+_letter_m_pts = [
     # topmost, leftmost point on top serif
     (0, _H_LINES[2]),
-    *curved_top,
-    *curved_top,
-    *curved_top[:2],
+    *_curved_top,
+    *_curved_top,
+    *_curved_top[:2],
     # rigth vertical line top to bottom
     (0, _H_LINES[5]),
-    *bottom_leg,
-    *bottom_leg,
-    *bottom_leg[:3],
+    *_bottom_leg,
+    *_bottom_leg,
+    *_bottom_leg[:3],
     # left vertical line bottom to top
     (0, _H_LINES[3]),
     (-_BEVEL, _H_LINES[3]),
 ]
 
-letter_m_pts = _relx_to_absx(letter_m_pts)
+_letter_m_pts = _relx_to_absx(_letter_m_pts)
 
 # ===============================================================================
 #   Letter i stem path
 # ===============================================================================
 
 
-def get_starting_point_of_letter_i() -> tuple[float, float]:
+def _get_starting_point_of_letter_i() -> tuple[float, float]:
     """Get the point just above the bottom serif of the letter i.
 
     Treat the i as if it were another vertical bar on the letter m.
     """
-    path = [letter_m_pts[-6], *bottom_leg]
+    path = [_letter_m_pts[-6], *_bottom_leg]
     return _relx_to_absx(path)[-1]
 
 
-letter_i_pts_stem = [
+_letter_i_pts_stem = [
     # just above the bottom serif of the letter i
-    get_starting_point_of_letter_i(),
-    *bottom_leg[:3],
+    _get_starting_point_of_letter_i(),
+    *_bottom_leg[:3],
     (0, _H_LINES[3]),
     (-_BEVEL, _H_LINES[3]),
     (0, _H_LINES[2]),
     (_STROKE_BOT, _H_LINES[2]),
 ]
 
-letter_i_pts_stem = _relx_to_absx(letter_i_pts_stem)
+_letter_i_pts_stem = _relx_to_absx(_letter_i_pts_stem)
 
 # ===============================================================================
 #   Letter i dot path
 # ===============================================================================
 
 
-side_length = (_H_LINES[1] - _H_LINES[0]) - _I_DOT_BEVEL * 2
+_side_length = (_H_LINES[1] - _H_LINES[0]) - _I_DOT_BEVEL * 2
 
-letter_i_pts_dot = [
+_letter_i_pts_dot = [
     # clockwise, from top bevel of lower, right corner
-    (letter_i_pts_stem[-1][0], _H_LINES[1] - _I_DOT_BEVEL),
+    (_letter_i_pts_stem[-1][0], _H_LINES[1] - _I_DOT_BEVEL),
     (-_I_DOT_BEVEL, _H_LINES[1]),
-    (-side_length, _H_LINES[1]),
+    (-_side_length, _H_LINES[1]),
     (-_I_DOT_BEVEL, _H_LINES[1] - _I_DOT_BEVEL),
     (0, _H_LINES[0] + _I_DOT_BEVEL),
     (_I_DOT_BEVEL, _H_LINES[0]),
-    (side_length, _H_LINES[0]),
+    (_side_length, _H_LINES[0]),
     (_I_DOT_BEVEL, _H_LINES[0] + _I_DOT_BEVEL),
 ]
 
-letter_i_pts_dot = _relx_to_absx(letter_i_pts_dot)
+_letter_i_pts_dot = _relx_to_absx(_letter_i_pts_dot)
 
-
-class SvgCommand:
-    """Create an svg command string from absolute coordinates.
-
-    This only works for linear splines (commands, "M", "L", "H", and "V").
-    """
-
-    def __init__(self, prev: SvgCommand | None, *pts: tuple[float, float]) -> None:
-        """Create an svg command string from absolute coordinates."""
-        self._prev = prev
-        self.xs = [su.format_number(x) for x, _ in pts]
-        self.ys = [su.format_number(y) for _, y in pts]
-        if len(pts) > 1:
-            msg = "SvgCommand only supports linear spline commands."
-            raise NotImplementedError(msg)
-        if prev is None:
-            self.command = "M"
-        elif self.ys[0] == prev.ys[0]:
-            self.command = "H"
-        elif self.xs[0] == prev.xs[0]:
-            self.command = "V"
-        else:
-            self.command = "L"
-
-    def _get_command_representation(self) -> str:
-        """Return the svg command ("M", "L", "H", ...) as displayed in `d` attribute.
-
-        The command string will be empty for identical adjacent commands and "L"
-        following "M".
-
-        "M x1,y1 x2,y2 x3,y3" behaves like "M x1,y1 L x2,y2 L x3,y3".
-        """
-        if self._prev is None:
-            return self.command
-        if self.command == self._prev.command:
-            return ""
-        if f"{self._prev.command}{self.command}" == "ML":
-            return ""
-        return self.command
-
-    def __str__(self) -> str:
-        """Return the svg command string.
-
-        One command in an svg path `d` attribute.
-
-        E.g., "L 3,4"
-        """
-        command = self._get_command_representation()
-        if command == "H":
-            pnts = f"{self.xs [0]}"
-        elif command == "V":
-            pnts = f"{self.ys[0]}"
-        else:
-            pnts = " ".join(f"{x},{y}" for x, y in zip(self.xs, self.ys))
-        if command:
-            return f"{command} {pnts}"
-        return pnts
-
-
-def new_data_string(pts: list[tuple[float, float]]) -> str:
-    """Create an svg data string from a list of points.
-
-    :param pts: list of (x, y) points in a linear spline.
-    :return: svg data string. E.g., "M 3,4 L 5,6 L 7,8 Z"
-    """
-    commands = [SvgCommand(None, pts[0])]
-    for pt in pts[1:]:
-        commands.append(SvgCommand(commands[-1], pt))
-    return " ".join(str(x) for x in commands) + " Z"
+# ===============================================================================
+#   Create `g` elements for the letters i and m
+# ===============================================================================
 
 
 def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
@@ -258,5 +194,5 @@ def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
     return group
 
 
-letter_m = _new_letter("letter_m", letter_m_pts)
-letter_i = _new_letter("letter_i", letter_i_pts_stem, letter_i_pts_dot)
+letter_m = _new_letter("letter_m", _letter_m_pts)
+letter_i = _new_letter("letter_i", _letter_i_pts_stem, _letter_i_pts_dot)
