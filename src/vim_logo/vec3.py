@@ -5,7 +5,7 @@
 """
 
 import math
-from typing import Iterable
+from collections.abc import Iterable
 
 Vec3 = tuple[float, float, float]
 
@@ -68,6 +68,7 @@ def add(vector_a: Vec3, vector_b: Vec3) -> Vec3:
     bx, by, bz = vector_b
     return ax + bx, ay + by, az + bz
 
+
 def vsum(*vectors: Vec3) -> Vec3:
     """Return the component-wise sum of an iterable of three-component vectors.
 
@@ -99,6 +100,7 @@ def dot(vector_a: Vec3, vector_b: Vec3) -> float:
     """
     return sum(multiply(vector_a, vector_b))
 
+
 def clamp(vector_a: Vec3, min_val: float = 0, max_val: float = 1) -> Vec3:
     """Return a vector with each component clamped between two values.
 
@@ -108,9 +110,12 @@ def clamp(vector_a: Vec3, min_val: float = 0, max_val: float = 1) -> Vec3:
     :return: a vector with each component clamped between min_val and max_val
     """
     x, y, z = vector_a
-    return (min(max_val, max(min_val, x)),
-            min(max_val, max(min_val, y)),
-            min(max_val, max(min_val, z)))
+    return (
+        min(max_val, max(min_val, x)),
+        min(max_val, max(min_val, y)),
+        min(max_val, max(min_val, z)),
+    )
+
 
 def cross(vector_a: Vec3, vector_b: Vec3) -> Vec3:
     """Return the cross product of two three-component vectors.
