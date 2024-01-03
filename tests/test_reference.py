@@ -9,7 +9,7 @@ from pathlib import Path
 import copy
 
 from vim_logo.paths import REFERENCE_IMAGE_PATH
-from vim_logo.letters_im import letter_m, letter_i
+from vim_logo.letters_im import letter_m, letter_i, letter_m_mask
 from vim_logo.diamond import diamond
 import svg_ultralight as su
 
@@ -31,16 +31,28 @@ transform_1 = "scale({})translate({} {})".format(
     *(su.format_number(x) for x in (scale, x_center, y_center))
 )
 
-transform = "scale({})translate({} {})".format(
+transform_2 = "translate({} {})".format(
+    *(su.format_number(x) for x in (-x_center, -y_center))
+)
+
+transform = "scale({})".format(
     *(su.format_number(x) for x in (scale, tx, ty))
 )
 
 def test_reference():
     reference_svg = etree.parse(REFERENCE_IMAGE_PATH)
     root = reference_svg.getroot()
+    defs = root[0]
+    _ = su.update_element(letter_m_mask, transform=transform_2)
+    mask = su.new_sub_element(defs, "mask", id="letter_m_mask_mask")
+    _ = su.new_sub_element(mask, "rect", x=-500, y=-500, width=1000, height=1000, fill="white")
+    _ = su.update_element(letter_m_mask, fill="black")
+    mask.append(letter_m_mask)
+
     for element in [diamond]:
         elem = copy.deepcopy(element)
         _ = su.update_element(elem, transform=transform_1)
+        _ = su.update_element(elem, mask="url(#letter_m_mask_mask)")
         root.append(elem)
     for element in [letter_i, letter_m]:
         elem = copy.deepcopy(element)

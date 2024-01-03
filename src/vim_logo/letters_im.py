@@ -57,6 +57,9 @@ _H_LINES = [
 #   Path transformations
 # ===============================================================================
 
+TX = 17 * 7.6
+TY = 17 * 5.75
+
 
 def _relx_to_absx(pts: list[tuple[float, float]]) -> list[tuple[float, float]]:
     """Convert a list of points from relative to absolute coordinates.
@@ -126,6 +129,9 @@ _letter_m_pts = [
 
 _letter_m_pts = _relx_to_absx(_letter_m_pts)
 
+_letter_m_mask_pts = [*_letter_m_pts[:14], *_letter_m_pts[26:]]
+
+
 # ===============================================================================
 #   Letter i stem path
 # ===============================================================================
@@ -177,6 +183,22 @@ _letter_i_pts_dot = _relx_to_absx(_letter_i_pts_dot)
 #   Create `g` elements for the letters i and m
 # ===============================================================================
 
+_letter_m_pts = [(x + TX, y + TY) for x, y in _letter_m_pts]
+_letter_m_mask_pts = [(x + TX, y + TY) for x, y in _letter_m_mask_pts]
+_letter_i_pts_dot = [(x + TX, y + TY) for x, y in _letter_i_pts_dot]
+_letter_i_pts_stem = [(x + TX, y + TY) for x, y in _letter_i_pts_stem]
+
+
+def _new_letter_m_mask() -> EtreeElement:
+    """Create a `path` element of the letter m mask.
+
+    :param ptss: list of lists of (x, y) points in a linear spline.
+    :return: `g` svg element.
+    """
+    skewed = [[_skew_point(pt) for pt in _letter_m_mask_pts]]
+    data_string = " ".join([new_data_string(pts) for pts in skewed])
+    return su.new_element("path", id="letter_m_mask", d=data_string)
+
 
 def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
     """Create a `g` svg element for a small letter.
@@ -194,5 +216,6 @@ def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
     return group
 
 
+letter_m_mask = _new_letter_m_mask()
 letter_m = _new_letter("letter_m", _letter_m_pts)
 letter_i = _new_letter("letter_i", _letter_i_pts_stem, _letter_i_pts_dot)
