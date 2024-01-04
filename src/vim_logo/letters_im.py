@@ -17,18 +17,11 @@ from typing import TYPE_CHECKING
 import svg_ultralight as su
 
 from vim_logo.glyphs import new_data_string
+from vim_logo import shared
 
 if TYPE_CHECKING:
     from lxml.etree import _Element as EtreeElement  # type: ignore
 
-# ===============================================================================
-#   Configuration.
-# ===============================================================================
-
-
-_STROKE_WIDTH = 6
-_STROKE_COLOR = "#000000"
-_FILL_COLOR = "#cccccc"
 
 # smaller bevels of the letter i dot
 _I_DOT_BEVEL = 1
@@ -211,8 +204,8 @@ def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
     data_string = " ".join([new_data_string(pts) for pts in skewed])
     group = su.new_element("g", id=name)
     outline = su.new_sub_element(group, "path", d=data_string)
-    _ = su.update_element(outline, stroke=_STROKE_COLOR, stroke_width=_STROKE_WIDTH)
-    _ = su.new_sub_element(group, "path", d=data_string, fill=_FILL_COLOR)
+    _ = su.update_element(outline, stroke=shared.MID_STROKE_COLOR, stroke_width=shared.MID_STROKE_WIDTH)
+    _ = su.new_sub_element(group, "path", d=data_string, fill=shared.VIM_GRAY)
     return group
 
 

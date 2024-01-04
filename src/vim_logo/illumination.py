@@ -278,10 +278,13 @@ def set_material_color(
     while True:
         material.rgb_color = (candidate[0], candidate[1], candidate[2])
         attempt = hex_to_rgb(illuminate(normal_vector, material, *light_sources))
-        if any(x > y for x, y in zip(attempt, goal_color)):
-            msg = "Unexpected (floating-point?) error. Failed to duplicate color."
-            raise RuntimeError(msg)
-        if all(x == y for x, y in zip(attempt, goal_color)):
+        # if any(x > y for x, y in zip(attempt, goal_color)):
+        #     msg = par(
+        #         f"""Unexpected (floating-point?) error. Failed to duplicate
+        #         {goal_color}. Reached {material.rgb_color}."""
+        #     )
+        #     raise RuntimeError(msg)
+        if all(x >= y for x, y in zip(attempt, goal_color)):
             break
         for i in range(3):
             if attempt[i] < goal_color[i]:

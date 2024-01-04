@@ -12,12 +12,9 @@ from typing import TYPE_CHECKING
 import svg_ultralight as su
 import vec2_math as vec2
 from offset_poly import offset_polygon
+from vim_logo import shared
 
 from vim_logo.diamond import (
-    PINSTRIPE_COLOR,
-    PINSTRIPE_STROKE_WIDTH,
-    STROKE_COLOR,
-    STROKE_WIDTH,
     get_bevel_surface_normal,
 )
 from vim_logo.glyphs import new_data_string
@@ -29,7 +26,6 @@ unit = 5.6785
 
 # first point is the inside corner of the V then COUNTERCLOCKWISE
 
-VIM_GRAY = "#aaaaaa"
 
 BEVEL_WIDTH = 6
 BEVEL_SLOPE = 1
@@ -53,11 +49,10 @@ FGy = BCy - XY_BEVEL * 2
 V_ANGLE = math.pi / 3.925
 V_VECTOR = (-math.cos(V_ANGLE), math.sin(V_ANGLE))
 
-LIGHT_SOURCE = LightSource("#ffffff", (-9, -12, 15))
 MATERIAL = set_material_color(
     (0, 0, 1),
-    Material(VIM_GRAY, ambient=0.1, diffuse=0.9, specular=0.0, hue_shift=0.1),
-    LIGHT_SOURCE,
+    Material(shared.VIM_GRAY, ambient=0.1, diffuse=0.9, specular=0.0, hue_shift=0.1),
+    *shared.LIGHT_SOURCES,
 )
 
 # YS = [0, V_TOP_SERIF_HEIGHT, V_TOP_SERIF_HEIGHT * 2 - XY_BEVEL * 2, V_HEIGHT, V_HEIGHT]
@@ -147,7 +142,6 @@ inner = [x.xsect for x in offset_polygon(outer, -BEVEL_WIDTH)]
 
 # (V_TOP_SERIF_WIDTH, YS[0]), (0, YS[1]), (-V_SERIF_CUT, YS[1]),
 
-_FILL_COLOR = "#ffff00"
 
 
 def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
@@ -176,16 +170,17 @@ def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
         "path",
         d=data_string_inner,
         fill="none",
-        stroke="#000000",
-        stroke_width=STROKE_WIDTH * 2,
+        stroke=shared.FAT_STROKE_COLOR,
+        stroke_width=shared.FAT_STROKE_WIDTH,
     )
+    _ = su.new_sub_element(letter_v, "path", d=data_string, fill=shared.VIM_GRAY)
     for bevel in bevels:
         normal = get_bevel_surface_normal(bevel[0], bevel[1], BEVEL_SLOPE)
         _ = su.new_sub_element(
             letter_v,
             "path",
             d=new_data_string(bevel),
-            fill=illuminate(normal, MATERIAL, LIGHT_SOURCE),
+            fill=illuminate(normal, MATERIAL, *shared.LIGHT_SOURCES),
         )
     for bevel in bevels:
         _ = su.new_sub_element(
@@ -193,16 +188,14 @@ def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
             "path",
             d=new_data_string(bevel),
             fill="none",
-            stroke=PINSTRIPE_COLOR,
-            stroke_width=PINSTRIPE_STROKE_WIDTH,
+            stroke=shared.PIN_STROKE_COLOR,
+            stroke_width=shared.PIN_STROKE_WIDTH,
         )
 
     # group = su.new_element("g", id=name)
 
     # outline = su.new_sub_element(group, "path", d=data_string)
     # _ = su.update_element(outline, stroke=_STROKE_COLOR, stroke_width=_STROKE_WIDTH)
-    _ = su.new_sub_element(letter_v, "path", d=data_string, fill=VIM_GRAY)
-    # _ = su.new_sub_element(group, "path", d=data_string, fill=_FILL_COLOR, opacity=.5)
     return letter_v
 
 

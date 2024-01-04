@@ -15,6 +15,7 @@ from offset_poly import offset_polygon
 from vim_logo import vec3
 from vim_logo.glyphs import new_data_string
 from vim_logo.illumination import LightSource, Material, illuminate, set_material_color
+from vim_logo import shared
 
 if TYPE_CHECKING:
     from lxml.etree import _Element as EtreeElement  # type: ignore
@@ -23,21 +24,15 @@ if TYPE_CHECKING:
 
 Vec2 = tuple[float, float]
 
-VIM_GREEN = "#009933"
 BEVEL_WIDTH = 3
 BEVEL_SLOPE = 1
 
-STROKE_COLOR = "#000000"
-STROKE_WIDTH = 6
 
-PINSTRIPE_COLOR = "#000000"
-PINSTRIPE_STROKE_WIDTH = 1 / 10
 
-LIGHT_SOURCE = LightSource("#ffffff", (-9, -12, 15))
 MATERIAL = set_material_color(
     (0, 0, 1),
-    Material(VIM_GREEN, ambient=0.1, diffuse=0.9, specular=0.0, hue_shift=0.1),
-    LIGHT_SOURCE,
+    Material(shared.VIM_GREEN, ambient=0.1, diffuse=0.9, specular=0.0, hue_shift=0.1),
+    *shared.LIGHT_SOURCES,
 )
 
 
@@ -92,17 +87,17 @@ def _new_diamond(rad: float) -> EtreeElement:
         "path",
         d=new_data_string(outer),
         fill="none",
-        stroke=STROKE_COLOR,
-        stroke_width=STROKE_WIDTH,
+        stroke=shared.FAT_STROKE_COLOR,
+        stroke_width=shared.FAT_STROKE_WIDTH,
     )
-    _ = su.new_sub_element(diamond, "path", d=new_data_string(inner), fill=VIM_GREEN)
+    _ = su.new_sub_element(diamond, "path", d=new_data_string(inner), fill=shared.VIM_GREEN)
     for bevel in bevels:
         normal = get_bevel_surface_normal(bevel[0], bevel[1], BEVEL_SLOPE)
         _ = su.new_sub_element(
             diamond,
             "path",
             d=new_data_string(bevel),
-            fill=illuminate(normal, MATERIAL, LIGHT_SOURCE),
+            fill=illuminate(normal, MATERIAL, *shared.LIGHT_SOURCES),
         )
     for bevel in bevels:
         _ = su.new_sub_element(
@@ -110,8 +105,8 @@ def _new_diamond(rad: float) -> EtreeElement:
             "path",
             d=new_data_string(bevel),
             fill="none",
-            stroke=PINSTRIPE_COLOR,
-            stroke_width=PINSTRIPE_STROKE_WIDTH,
+            stroke=shared.PIN_STROKE_COLOR,
+            stroke_width=shared.PIN_STROKE_WIDTH,
         )
     return diamond
 
