@@ -116,4 +116,4 @@ def _new_diamond(rad: float) -> EtreeElement:
     return diamond
 
 
-diamond = _new_diamond(71)
+diamond = _new_diamond(71 * 1.9)

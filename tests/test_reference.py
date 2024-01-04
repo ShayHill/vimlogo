@@ -36,6 +36,14 @@ transform_2 = "translate({} {})".format(
     *(su.format_number(x) for x in (-x_center, -y_center))
 )
 
+transform_3 = "translate({} {})".format(
+    *(su.format_number(x) for x in (x_center * scale, y_center * scale))
+)
+
+transform_4 = "scale({})translate({} {})".format(
+    *(su.format_number(x) for x in (scale, -x_center, -y_center))
+)
+
 transform = "scale({})".format(
     *(su.format_number(x) for x in (scale, tx, ty))
 )
@@ -44,7 +52,7 @@ def test_reference():
     reference_svg = etree.parse(REFERENCE_IMAGE_PATH)
     root = reference_svg.getroot()
     defs = root[0]
-    _ = su.update_element(letter_m_mask, transform=transform_2)
+    _ = su.update_element(letter_m_mask, transform=transform_4)
     mask = su.new_sub_element(defs, "mask", id="letter_m_mask_mask")
     _ = su.new_sub_element(mask, "rect", x=-500, y=-500, width=1000, height=1000, fill="white")
     _ = su.update_element(letter_m_mask, fill="black")
@@ -55,7 +63,7 @@ def test_reference():
 
     for element in [diamond]:
         elem = copy.deepcopy(element)
-        _ = su.update_element(elem, transform=transform_1)
+        _ = su.update_element(elem, transform=transform_3)
         _ = su.update_element(elem, mask="url(#letter_m_mask_mask)")
         root.append(elem)
     for element in [letter_v]:
