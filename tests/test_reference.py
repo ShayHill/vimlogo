@@ -10,6 +10,7 @@ import copy
 
 from vim_logo.paths import REFERENCE_IMAGE_PATH
 from vim_logo.letters_im import letter_m, letter_i, letter_m_mask
+from  vim_logo.letter_v import letter_v
 from vim_logo.diamond import diamond
 import svg_ultralight as su
 
@@ -49,10 +50,17 @@ def test_reference():
     _ = su.update_element(letter_m_mask, fill="black")
     mask.append(letter_m_mask)
 
+    _ = su.new_sub_element(root, "rect", x=-500, y=-500, width=1000, height=1000, fill="white")
+    
+
     for element in [diamond]:
         elem = copy.deepcopy(element)
         _ = su.update_element(elem, transform=transform_1)
         _ = su.update_element(elem, mask="url(#letter_m_mask_mask)")
+        root.append(elem)
+    for element in [letter_v]:
+        elem = copy.deepcopy(element)
+        # _ = su.update_element(elem, transform=transform)
         root.append(elem)
     for element in [letter_i, letter_m]:
         elem = copy.deepcopy(element)

@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 
 _STROKE_WIDTH = 6
-_STROKE_COLOR = "#ff0000"
+_STROKE_COLOR = "#000000"
 _FILL_COLOR = "#cccccc"
 
 # smaller bevels of the letter i dot
