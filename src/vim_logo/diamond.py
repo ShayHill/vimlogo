@@ -24,14 +24,14 @@ if TYPE_CHECKING:
 
 Vec2 = tuple[float, float]
 
-BEVEL_WIDTH = 3
-BEVEL_SLOPE = 1
+BEVEL_WIDTH = 3 * 1.8
+BEVEL_SLOPE = 4
 
 
 
 MATERIAL = set_material_color(
     (0, 0, 1),
-    Material(shared.VIM_GREEN, ambient=0.1, diffuse=0.9, specular=0.0, hue_shift=0.1),
+    Material(shared.VIM_GREEN, ambient=3, diffuse=7, specular=0.0, hue_shift=0.1),
     *shared.LIGHT_SOURCES,
 )
 
