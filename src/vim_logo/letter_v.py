@@ -1,5 +1,60 @@
 """The giant letter V in the Vim logo.
 
+There are small bevels at every 90-degree right turn (going clockwise). Ignoring
+those for the moment, the letter is basically built like this.
+
+a----------b     i----------j
+|          |     |          |
+o--n    d--c     h--g       k
+   |    |           |      /
+   |    |           f     /
+   |    |          /     /
+   |    |         /     /
+   |    |        /     /
+   |    |       /     /
+   |    |      /     /
+   |    |     /     /
+   |    |    /     /
+   |    |   /     /
+   |    |* /     /
+   |    | /     /
+   |    e      /
+   |          /
+   |         /
+   |        /
+   |       /
+   m------l
+
+I've parameterized the letter as:
+* overall width
+* distance from a to b
+* distance from b to c
+* distance from c to d
+* distance from m to l
+* angle from e to f (and l to k)
+
+To set that angle to exactly 45 degrees, I've had to widen the letter. In the
+original e->f was 45 degrees, but l->k was not. This cheat allowed the letter to
+remain in the original footprint. Removing the cheat means I need a shorter or wider
+letter V.
+
+The distance from f to g is set so that e->f and *->g are parallel. This is due to
+the funny construction of the bevels.
+
+After building this basic shape, I bevel the 90-degree right turns (at a, b, c, h, i,
+j, m, and o) to get 23 points, starting with the ccw bevel point at point a. I then
+offset all of these points to get a second set of 23 points which define a polygon
+BEVEL distance outside the original polygon.
+
+These bevels require some adjustment at points 8 and 9 (equivalent to points f and j,
+neither of which are beveled). These bevel points are made identical and equal to the
+intersection of bevel edges 7->8 (equivalent to e->f) and 9->10 (equivalent to g->h).
+
+The final construction is a white polygon over the entire outer bevels, a gray
+polygon over the letter itself, shaded polygons explicity defined for shaded bevels,
+and a thin outline around the letter to hide the seams between the letter and shaded
+polygons.
+       
 :author: Shay Hill
 :created: 2024-01-03
 """
@@ -50,9 +105,9 @@ VERTICAL_BAR_WIDTH = 55
 ABx = V_TOP_SERIF_WIDTH
 BCy = V_TOP_SERIF_HEIGHT
 CDx = (V_TOP_SERIF_WIDTH - VERTICAL_BAR_WIDTH) / 2
-FGy = BCy - XY_BEVEL * 2
 
 V_ANGLE = math.pi / 3.925 / 1.5
+V_ANGLE = math.pi / 4
 V_VECTOR = (-math.sin(V_ANGLE), math.cos(V_ANGLE))
 
 MATERIAL = set_material_color(
@@ -64,43 +119,60 @@ MATERIAL = set_material_color(
 # YS = [0, V_TOP_SERIF_HEIGHT, V_TOP_SERIF_HEIGHT * 2 - XY_BEVEL * 2, V_HEIGHT, V_HEIGHT]
 
 
-row_0 = [(0, 0), (V_TOP_SERIF_WIDTH, 0), (V_WIDTH - V_TOP_SERIF_WIDTH, 0), (V_WIDTH, 0)]
-row_1: list[tuple[float, float]] = []
-new_y = V_TOP_SERIF_HEIGHT
-for i, (x, _) in enumerate(row_0):
-    if i % 2 == 0:
-        row_1.append((x, new_y))
-        row_1.append((x + CDx, new_y))
-    else:
-        row_1.append((x - CDx, new_y))
-        row_1.append((x, new_y))
-row_1[-2:] = [vec2.vadd(row_1[-1], (0, -XY_BEVEL))]
+def get_letter_v_rough_outline() -> list[tuple[float, float]]:
+    # points along the top of the V serifs, left to right.
+    pnt_a, pnt_b = (0, 0), (ABx, 0)
+    pnt_i, pnt_j = (V_WIDTH - ABx, 0), (V_WIDTH, 0)
 
-row2_offset = BEVEL_WIDTH / (math.sin(V_ANGLE))
-row_2 = [(row_1[5][0], row_1[5][1] + row2_offset)]
+    # points on the lower outside corners of the V serifs, left to right.
+    pnt_o, pnt_c, pnt_h, pnt_k = (
+        vec2.vadd(p, (0, BCy)) for p in (pnt_a, pnt_b, pnt_i, pnt_j)
+    )
 
-vec_de = vec2.get_standard_form((row_1[2], vec2.vadd(row_1[2], (0, 1))))
-vec_fe = vec2.get_standard_form((row_2[0], vec2.vadd(row_2[0], V_VECTOR)))
+    # raise pnt_k to be more like the vim.org logo, where pnt_k appears to be the top
+    # point of what would have been an extension of the right, top serif.
+    pnt_k = vec2.vsub(pnt_k, (0, XY_BEVEL))
 
-row_3 = [vec2.get_line_intersection(vec_de, vec_fe)]
+    # points on the lower inside corners of the V serifs. There is no
+    # suck point to the left of pnt_k.
+    pnt_n, pnt_g = (vec2.vadd(p, (CDx, 0)) for p in (pnt_o, pnt_h))
+    pnt_d = vec2.vadd(pnt_c, (-CDx, 0))
 
-top_of_slant = vec2.vadd(row_1[-1], (0, XY_BEVEL))
-vec_kl = vec2.get_standard_form((row_1[-1], vec2.vadd(row_1[-1], V_VECTOR)))
-vec_nm = vec2.get_standard_form((row_1[1], vec2.vadd(row_1[1], (0, 1))))
+    pnt_f = vec2.vadd(pnt_g, (0, BEVEL_WIDTH / math.sin(V_ANGLE)))
 
+    # inside corner of the V
+    pnt_e = get_ray_intersection((pnt_d, (0, 1)), (pnt_f, V_VECTOR))
 
-def los(theta: float, n: float) -> float:
-    """Use the law of signs to find how far to travel down the x axis to get n units up the y axis."""
-    return n * math.sin(math.pi / 2 - theta) / math.sin(theta)
+    # bottom of the V
+    bottom_pnt = get_ray_intersection((pnt_n, (0, 1)), (pnt_k, V_VECTOR))
+    pnt_m = vec2.vsub(bottom_pnt, (0, V_BOTTOM_SERIF_WIDTH / math.sin(V_ANGLE)))
+    pnt_l = vec2.vadd(pnt_m, (V_BOTTOM_SERIF_WIDTH, 0))
+
+    return [
+        pnt_a,
+        pnt_b,
+        pnt_c,
+        pnt_d,
+        pnt_e,
+        pnt_f,
+        pnt_g,
+        pnt_h,
+        pnt_i,
+        pnt_j,
+        pnt_k,
+        pnt_l,
+        pnt_m,
+        pnt_n,
+        pnt_o,
+    ]
 
 
 def get_ray_intersection(
-    pnt_a: tuple[float, float],
-    vec_a: tuple[float, float],
-    pnt_b: tuple[float, float],
-    vec_b: tuple[float, float],
+    ray_a: LINE_SEGMENT, ray_b: LINE_SEGMENT
 ) -> tuple[float, float]:
     """Get the intersection of two lines, each defined by a point and a vector."""
+    pnt_a, vec_a = ray_a
+    pnt_b, vec_b = ray_b
     line_a = vec2.get_standard_form((pnt_a, vec2.vadd(pnt_a, vec_a)))
     line_b = vec2.get_standard_form((pnt_b, vec2.vadd(pnt_b, vec_b)))
     xsect = vec2.get_line_intersection(line_a, line_b)
@@ -127,11 +199,6 @@ def get_abcd_intersection(
     return xsect
 
 
-bottom_point = vec2.get_line_intersection(vec_kl, vec_nm)
-point_m = vec2.vadd(bottom_point, (0, los(V_ANGLE, -V_BOTTOM_SERIF_WIDTH)))
-vec_ml = vec2.get_standard_form((point_m, vec2.vadd(point_m, (1, 0))))
-point_l = vec2.get_line_intersection(vec_ml, vec_kl)
-
 
 def bevel_90_turns(pts: list[tuple[float, float]]) -> list[tuple[float, float]]:
     """Find any 90-degree turns in a list of points and replace them with a bevel."""
@@ -149,23 +216,9 @@ def bevel_90_turns(pts: list[tuple[float, float]]) -> list[tuple[float, float]]:
     return new_pts
 
 
-_letter_v_pts = [
-    row_0[0],
-    row_0[1],
-    row_1[3],
-    row_1[2],
-    row_3[0],
-    row_2[0],
-    row_1[5],
-    row_1[4],
-    row_0[2],
-    row_0[3],
-    row_1[6],
-    point_l,
-    point_m,
-    row_1[1],
-    row_1[0],
-]
+
+_letter_v_pts = get_letter_v_rough_outline()
+
 
 _letter_v_pts = bevel_90_turns(_letter_v_pts)
 
@@ -173,6 +226,7 @@ _letter_v_pts = [vec2.vadd(pt, (36, 29)) for pt in _letter_v_pts]
 
 inner = _letter_v_pts
 outer = [x.xsect for x in offset_polygon(inner, -BEVEL_WIDTH)]
+
 
 outer[8] = outer[9] = get_abcd_intersection((outer[7], inner[9]), (outer[10], outer[9]))
 # aaa = get_abcd_intersection((outer[7], inner[9]), (outer[10], outer[9]))
