@@ -32,6 +32,13 @@ I've parameterized the letter as:
 * distance from c to d
 * distance from l to m
 * angle from e to f (and l to k)
+* bevels on the xy plane (XY_BEVEL)
+
+Bevels into the z plane (Z_BEVEL) are calculated from the XY_BEVEL such that at a
+right corner A, B, C, the first bevel point will be collinear with BC and second
+bevel point collinear with AB. The only way to decrease or increase these bevels is
+to decrease or increase the XY_BEVEL. This was the main source of "cheating" in the
+original vim.org logo.
 
 To set that angle to exactly 45 degrees, I've had to widen the letter. In the
 original e->f was 45 degrees, but l->k was not. This cheat allowed the letter to
@@ -79,34 +86,33 @@ from vim_logo.illumination import LightSource, Material, illuminate, set_materia
 
 if TYPE_CHECKING:
     from lxml.etree import _Element as EtreeElement  # type: ignore
-unit = 5.6785
 
 # first point is the inside corner of the V then COUNTERCLOCKWISE
 
 
-# BEVEL_WIDTH = 6
 BEVEL_SLOPE = 4
-XY_BEVEL = 3
+XY_BEVEL = 2.5
 TWO_VEC2 = tuple[tuple[float, float], tuple[float, float]]
 
-
-BEVEL_WIDTH = XY_BEVEL * math.sin(3 / 8 * math.pi) / math.sin(1 / 8 * math.pi)
+# For a right-angle corner A, B, C, set bevel width so the first bevel point will be
+# collinear with BC and second bevel point collinear with AB
+Z_BEVEL = XY_BEVEL * math.sin(3 / 8 * math.pi) / math.sin(1 / 8 * math.pi)
 
 V_WIDTH = 235
 ABx = 88
 BCy = 17
 CDx = 16.5
-LMx = BCy - XY_BEVEL 
-V_ANGLE = math.pi / 4
+LMx = BCy + XY_BEVEL
+V_ANGLE = math.pi / 3.85
 
-
-V_VECTOR = (-math.sin(V_ANGLE), math.cos(V_ANGLE))
+V_VECTOR = (-math.cos(V_ANGLE), math.sin(V_ANGLE))
 
 MATERIAL = set_material_color(
     (0, 0, 1),
     Material(shared.VIM_GRAY, ambient=3, diffuse=7, specular=0.0, hue_shift=0.1),
     *shared.LIGHT_SOURCES,
 )
+
 
 def get_letter_v_rough_outline() -> list[tuple[float, float]]:
     # points along the top of the V serifs, left to right.
@@ -127,7 +133,7 @@ def get_letter_v_rough_outline() -> list[tuple[float, float]]:
     pnt_n, pnt_g = (vec2.vadd(p, (CDx, 0)) for p in (pnt_o, pnt_h))
     pnt_d = vec2.vadd(pnt_c, (-CDx, 0))
 
-    pnt_f = vec2.vadd(pnt_g, (0, BEVEL_WIDTH / math.sin(V_ANGLE)))
+    pnt_f = vec2.vadd(pnt_g, (0, Z_BEVEL / math.sin(V_ANGLE)))
 
     # inside corner of the V
     pnt_e = get_ray_intersection((pnt_d, (0, 1)), (pnt_f, V_VECTOR))
@@ -156,9 +162,7 @@ def get_letter_v_rough_outline() -> list[tuple[float, float]]:
     ]
 
 
-def get_ray_intersection(
-    ray_a: TWO_VEC2, ray_b: TWO_VEC2
-) -> tuple[float, float]:
+def get_ray_intersection(ray_a: TWO_VEC2, ray_b: TWO_VEC2) -> tuple[float, float]:
     """Get the intersection of two lines, each defined by a point and a vector."""
     pnt_a, vec_a = ray_a
     pnt_b, vec_b = ray_b
@@ -171,9 +175,7 @@ def get_ray_intersection(
     return xsect
 
 
-def get_abcd_intersection(
-    seg_ab: TWO_VEC2, seg_cd: TWO_VEC2
-) -> tuple[float, float]:
+def get_abcd_intersection(seg_ab: TWO_VEC2, seg_cd: TWO_VEC2) -> tuple[float, float]:
     """Get the intersection of two lines, each defined by two points on the line.
 
     :param seg_ab: two points on the first line.
@@ -186,7 +188,6 @@ def get_abcd_intersection(
         msg = "rays are parallel or coincident"
         raise ValueError(msg)
     return xsect
-
 
 
 def bevel_90_turns(pts: list[tuple[float, float]]) -> list[tuple[float, float]]:
@@ -205,17 +206,14 @@ def bevel_90_turns(pts: list[tuple[float, float]]) -> list[tuple[float, float]]:
     return new_pts
 
 
-
 _letter_v_pts = get_letter_v_rough_outline()
-
 
 _letter_v_pts = bevel_90_turns(_letter_v_pts)
 
 _letter_v_pts = [vec2.vadd(pt, (36, 29)) for pt in _letter_v_pts]
 
 inner = _letter_v_pts
-outer = [x.xsect for x in offset_polygon(inner, -BEVEL_WIDTH)]
-
+outer = [x.xsect for x in offset_polygon(inner, -Z_BEVEL)]
 
 outer[8] = outer[9] = get_abcd_intersection((outer[7], inner[9]), (outer[10], outer[9]))
 # aaa = get_abcd_intersection((outer[7], inner[9]), (outer[10], outer[9]))
@@ -226,7 +224,7 @@ outer[8] = outer[9] = get_abcd_intersection((outer[7], inner[9]), (outer[10], ou
 #     (ABx, BCy),
 #     ),
 
-
+SHADE_GRAY = "#7f7f7f"
 
 def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
     """Create a `g` svg element for a small letter.
@@ -238,8 +236,8 @@ def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
     # skewed = [[_skew_point(pt) for pt in pts] for pts in ptss]
     skewed = ptss
     data_string = " ".join([new_data_string(pts) for pts in skewed])
-    data_string_inner = new_data_string(outer)
-    data_string_outer = new_data_string(inner)
+    data_string_outer = new_data_string(outer)
+    data_string_inner = new_data_string(inner)
     len_pts = len(inner)
     bevels: list[list[tuple[float, float]]] = []
 
@@ -252,29 +250,59 @@ def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
     _ = su.new_sub_element(
         letter_v,
         "path",
-        d=data_string_inner,
+        d=data_string_outer,
         fill="none",
         stroke=shared.FAT_STROKE_COLOR,
         stroke_width=shared.FAT_STROKE_WIDTH,
     )
-    _ = su.new_sub_element(letter_v, "path", d=data_string, fill=shared.VIM_GRAY)
-    for bevel in bevels[:8]:
-        normal = get_bevel_surface_normal(bevel[0], bevel[1], BEVEL_SLOPE)
+    _ = su.new_sub_element(
+        letter_v,
+        "path",
+        d=data_string_outer,
+        fill="#ffffff",
+    )
+    # beg shading bevels
+    shaded = [
+       [*outer[3:8], *inner[2:8][::-1]],
+       [*outer[9:11], *inner[9:12][::-1]],
+       [*outer[15:19], *inner[14:21][::-1]],
+       [*outer[20:22], *inner[20:23][::-1]],
+    ]
+    for polygon in shaded:
         _ = su.new_sub_element(
             letter_v,
             "path",
-            d=new_data_string(bevel),
-            fill=illuminate(normal, MATERIAL, *shared.LIGHT_SOURCES),
-        )
-    for bevel in bevels:
-        _ = su.new_sub_element(
-            letter_v,
-            "path",
-            d=new_data_string(bevel),
-            fill="none",
-            stroke="#ff0000",  # shared.PIN_STROKE_COLOR,
+            d=new_data_string(polygon),
+            fill=SHADE_GRAY,
+            stroke=shared.PIN_STROKE_COLOR,
             stroke_width=shared.PIN_STROKE_WIDTH,
         )
+    # end shading bevels
+    _ = su.new_sub_element(
+        letter_v,
+        "path",
+        d=data_string,
+        fill=shared.VIM_GRAY,
+        stroke=shared.PIN_STROKE_COLOR,
+        stroke_width=shared.PIN_STROKE_WIDTH,
+    )
+    # for bevel in bevels[:8]:
+    #     normal = get_bevel_surface_normal(bevel[0], bevel[1], BEVEL_SLOPE)
+    #     _ = su.new_sub_element(
+    #         letter_v,
+    #         "path",
+    #         d=new_data_string(bevel),
+    #         fill=illuminate(normal, MATERIAL, *shared.LIGHT_SOURCES),
+    #     )
+    # for bevel in bevels:
+    #     _ = su.new_sub_element(
+    #         letter_v,
+    #         "path",
+    #         d=new_data_string(bevel),
+    #         fill="none",
+    #         stroke="#ff0000",  # shared.PIN_STROKE_COLOR,
+    #         stroke_width=shared.PIN_STROKE_WIDTH,
+    #     )
 
     # group = su.new_element("g", id=name)
 
