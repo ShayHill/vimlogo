@@ -30,7 +30,7 @@ I've parameterized the letter as:
 * distance from a to b
 * distance from b to c
 * distance from c to d
-* distance from m to l
+* distance from l to m
 * angle from e to f (and l to k)
 
 To set that angle to exactly 45 degrees, I've had to widen the letter. In the
@@ -87,27 +87,19 @@ unit = 5.6785
 # BEVEL_WIDTH = 6
 BEVEL_SLOPE = 4
 XY_BEVEL = 3
-LINE_SEGMENT = tuple[tuple[float, float], tuple[float, float]]
+TWO_VEC2 = tuple[tuple[float, float], tuple[float, float]]
 
 
 BEVEL_WIDTH = XY_BEVEL * math.sin(3 / 8 * math.pi) / math.sin(1 / 8 * math.pi)
 
 V_WIDTH = 235
-# V_HEIGHT = 218.304693
-V_TOP_SERIF_WIDTH = 88
-V_TOP_SERIF_HEIGHT = 17
-V_BOTTOM_SERIF_WIDTH = V_TOP_SERIF_HEIGHT + XY_BEVEL
-V_SERIF_CUT = 25
-
-
-VERTICAL_BAR_WIDTH = 55
-
-ABx = V_TOP_SERIF_WIDTH
-BCy = V_TOP_SERIF_HEIGHT
-CDx = (V_TOP_SERIF_WIDTH - VERTICAL_BAR_WIDTH) / 2
-
-V_ANGLE = math.pi / 3.925 / 1.5
+ABx = 88
+BCy = 17
+CDx = 16.5
+LMx = BCy - XY_BEVEL 
 V_ANGLE = math.pi / 4
+
+
 V_VECTOR = (-math.sin(V_ANGLE), math.cos(V_ANGLE))
 
 MATERIAL = set_material_color(
@@ -115,9 +107,6 @@ MATERIAL = set_material_color(
     Material(shared.VIM_GRAY, ambient=3, diffuse=7, specular=0.0, hue_shift=0.1),
     *shared.LIGHT_SOURCES,
 )
-
-# YS = [0, V_TOP_SERIF_HEIGHT, V_TOP_SERIF_HEIGHT * 2 - XY_BEVEL * 2, V_HEIGHT, V_HEIGHT]
-
 
 def get_letter_v_rough_outline() -> list[tuple[float, float]]:
     # points along the top of the V serifs, left to right.
@@ -145,8 +134,8 @@ def get_letter_v_rough_outline() -> list[tuple[float, float]]:
 
     # bottom of the V
     bottom_pnt = get_ray_intersection((pnt_n, (0, 1)), (pnt_k, V_VECTOR))
-    pnt_m = vec2.vsub(bottom_pnt, (0, V_BOTTOM_SERIF_WIDTH / math.sin(V_ANGLE)))
-    pnt_l = vec2.vadd(pnt_m, (V_BOTTOM_SERIF_WIDTH, 0))
+    pnt_m = vec2.vsub(bottom_pnt, (0, LMx / math.sin(V_ANGLE)))
+    pnt_l = vec2.vadd(pnt_m, (LMx, 0))
 
     return [
         pnt_a,
@@ -168,7 +157,7 @@ def get_letter_v_rough_outline() -> list[tuple[float, float]]:
 
 
 def get_ray_intersection(
-    ray_a: LINE_SEGMENT, ray_b: LINE_SEGMENT
+    ray_a: TWO_VEC2, ray_b: TWO_VEC2
 ) -> tuple[float, float]:
     """Get the intersection of two lines, each defined by a point and a vector."""
     pnt_a, vec_a = ray_a
@@ -183,7 +172,7 @@ def get_ray_intersection(
 
 
 def get_abcd_intersection(
-    seg_ab: LINE_SEGMENT, seg_cd: LINE_SEGMENT
+    seg_ab: TWO_VEC2, seg_cd: TWO_VEC2
 ) -> tuple[float, float]:
     """Get the intersection of two lines, each defined by two points on the line.
 
@@ -237,7 +226,6 @@ outer[8] = outer[9] = get_abcd_intersection((outer[7], inner[9]), (outer[10], ou
 #     (ABx, BCy),
 #     ),
 
-# (V_TOP_SERIF_WIDTH, YS[0]), (0, YS[1]), (-V_SERIF_CUT, YS[1]),
 
 
 def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
@@ -296,45 +284,3 @@ def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
 
 
 letter_v = _new_letter("letter_v", _letter_v_pts)
-
-
-_letter_v_pts = [
-    (105.55717, 153.80024),
-    (105.55717, 46.089297),
-    (121.61576, 46.089297),
-    (124.49467, 43.280707),
-    (124.49467, 31.905707),
-    (121.61576, 29.097107),
-    (38.4556, 29.097107),
-    (35.647, 31.905707),
-    (35.647, 43.280707),
-    (38.4556, 46.089297),
-    (52.63919, 46.089297),
-    (52.63919, 244.59321),
-    (56.31108, 247.4018),
-    (72.510285, 247.4018),
-    (270.93998, 40.472107),
-    (270.93998, 32.335387),
-    (268.06108, 29.097107),
-    (185.90873, 29.097107),
-    (183.02983, 31.905707),
-    (183.02983, 43.351017),
-    (185.90873, 46.159607),
-    (200.09233, 46.159607),
-    (200.09233, 57.534607),
-    (105.55717, 153.80024),
-]
-
-
-V_WIDTH = max(pt[0] for pt in _letter_v_pts) - min(pt[0] for pt in _letter_v_pts)
-V_HEIGHT = max(pt[1] for pt in _letter_v_pts) - min(pt[1] for pt in _letter_v_pts)
-
-print(f"width: {V_WIDTH}")
-print(f"height: {V_HEIGHT}")
-
-unit = 2.8
-for a, b in zip(_letter_v_pts, _letter_v_pts[1:]):
-    vx, vy = a
-    dx, dy = vec2.vsub(a, b)
-    print(f"{vx / unit:.4f}, {vy / unit:.4f}", end=" => ")
-    print(f"{dx / unit:.4f}, {dy / unit:.4f}")
