@@ -17,6 +17,9 @@ from vim_logo.glyphs import new_data_string
 from vim_logo.illumination import LightSource, Material, illuminate, set_material_color
 from vim_logo import shared
 
+
+from basic_colormath import rgb_to_hsl, hsl_to_rgb, rgb_to_hex, hex_to_rgb
+
 if TYPE_CHECKING:
     from lxml.etree import _Element as EtreeElement  # type: ignore
 
@@ -24,19 +27,44 @@ if TYPE_CHECKING:
 
 Vec2 = tuple[float, float]
 
-BEVEL_WIDTH = 3 * 1.8
+Z_BEVEL = 3 * 2
 BEVEL_SLOPE = 4
 
 
+def _push_hsl(color: str, hue_shift: float=0, sat_shift: float=0, lit_shift: float=0) -> str:
+    """Shift the hue, saturation, and lightness of a color.
+
+    :param color: hex color str, e.g., "#ff3322"
+    :param hue_shift: -365 to 365, maximum amount to change hue
+    :param sat_shift: -100 to 100, maximum amount to change saturation
+    :param lit_shift: -100 to 100, maximum amount to change lightness
+    :return: (r, g, b)
+
+    The intermediate hue, sat, and lit values are in the ranges
+    [0, 365), [0, 100], and [0, 100].
+    """
+    hue, sat, lit = rgb_to_hsl(hex_to_rgb(color))
+    hue = (hue + hue_shift) % 365
+    sat = max(0, min(100, sat + sat_shift))
+    lit = max(0, min(100, lit + lit_shift))
+    return rgb_to_hex(hsl_to_rgb((hue, sat, lit)))
 
 MATERIAL = set_material_color(
     (0, 0, 1),
-    Material(shared.VIM_GREEN, ambient=3, diffuse=7, specular=0.0, hue_shift=0.1),
+    Material(
+        _push_hsl(shared.VIM_GREEN, hue_shift=5, sat_shift=-50, lit_shift=00),
+        ambient=1/2,
+        diffuse=8.5,
+        specular=1,
+        hue_shift=0.0,
+        sat_shift=0,
+    ),
     *shared.LIGHT_SOURCES,
 )
 
 
-def get_bevel_surface_normal(
+
+def _get_bevel_surface_normal(
     pnt_a2: tuple[float, float], pnt_b2: tuple[float, float], slope: float
 ) -> Vec3:
     """Calculate the surface normal of a bevel.
@@ -77,22 +105,21 @@ def _get_diamond_points(rad: float) -> list[tuple[float, float]]:
 def _new_diamond(rad: float) -> EtreeElement:
     """Return a diamond element."""
     outer = _get_diamond_points(rad)
-    inner = [x.xsect for x in offset_polygon(outer, BEVEL_WIDTH)]
+    inner = [x.xsect for x in offset_polygon(outer, Z_BEVEL)]
     bevels: list[list[Vec2]] = []
     for i in range(4):
         bevels.append([inner[i], inner[(i + 1) % 4], outer[(i + 1) % 4], outer[i]])
     diamond = su.new_element("g")
     _ = su.new_sub_element(
-        diamond,
-        "path",
-        d=new_data_string(outer),
-        fill="none",
-        stroke=shared.FAT_STROKE_COLOR,
-        stroke_width=shared.FAT_STROKE_WIDTH,
+        diamond, "path", d=new_data_string(outer), fill="none", **shared.MID_STROKE
     )
-    _ = su.new_sub_element(diamond, "path", d=new_data_string(inner), fill=shared.VIM_GREEN)
+    _ = su.new_sub_element(
+        diamond, "path", d=new_data_string(inner), fill=shared.VIM_GREEN
+        # diamond, "path", d=new_data_string(inner), fill=illuminate((0, 0, 1), MATERIAL, *shared.LIGHT_SOURCES),
+
+    )
     for bevel in bevels:
-        normal = get_bevel_surface_normal(bevel[0], bevel[1], BEVEL_SLOPE)
+        normal = _get_bevel_surface_normal(bevel[0], bevel[1], BEVEL_SLOPE)
         _ = su.new_sub_element(
             diamond,
             "path",
@@ -101,12 +128,7 @@ def _new_diamond(rad: float) -> EtreeElement:
         )
     for bevel in bevels:
         _ = su.new_sub_element(
-            diamond,
-            "path",
-            d=new_data_string(bevel),
-            fill="none",
-            stroke=shared.PIN_STROKE_COLOR,
-            stroke_width=shared.PIN_STROKE_WIDTH,
+            diamond, "path", d=new_data_string(bevel), fill="none", **shared.PIN_STROKE
         )
     return diamond
 

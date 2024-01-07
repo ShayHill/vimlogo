@@ -32,14 +32,14 @@ VIM_GREEN = "#009933"
 
 # the light source for V and diamond bevels
 
-_total_intensity = 24
-_light_sources = 24
+_total_intensity = 8
+_light_sources = 32
 
 LIGHT_SOURCES: list[LightSource] = []
 intensity = 255 * _total_intensity / _light_sources
-color = rgb_to_hex((intensity, intensity, intensity))
-pnt_a = (-24, 0, 4)
-pnt_b = (0, -24, 4)
+color = rgb_to_hex((intensity, intensity, intensity / 4))
+pnt_a = (-24, 0, 2)
+pnt_b = (15, -24, 2)
 for i in range(_light_sources):
     time = i / (_light_sources - 1)
     contrib_a = vec3.scale(pnt_a, 1 - time)

@@ -230,13 +230,7 @@ def uniform_shading_model(
     multiple light sources.
     """
     material.color = vec3.clamp(material.color)
-    h, s, l = material.hsl_color
-    min_s = 0  # max(s - material.sat_shift, 0)
-    max_s = max(s - material.sat_shift, 0)
-    color_map = (hsl_to_rgb((h, min_s, l)), material.rgb_color)
-    # if len(set(material.rgb_color)) > 1:
-    #     breakpoint()
-    # color intensities
+
     I_a = material.color
     I_d = material.color
     I_s = light_source.color
@@ -250,21 +244,13 @@ def uniform_shading_model(
     L = light_source.direction
     L_dot_N = vec3.dot(L, N)
 
-    aaa = vec3.clamp(interp3(*color_map, L_dot_N), 0, 255)
-    # aaa = vec4.scale(aaa, 255)
-    bbb = float_tuple_to_8bit_int_tuple(aaa)
-    ccc = _rgb_to_intensity(bbb)
-    I_d = ccc
-    # I_d = _rgb_to_intensity(vec3.clamp(interp3(*color_map, L_dot_N), 0, 255))
-    # except:
-    #     breakpoint()
     R = vec3.subtract(vec3.scale(N, 2 * L_dot_N), L)
 
     V = _VIEWER
     R_dot_V = vec3.dot(R, V)
 
     a_term = vec3.scale(I_a, k_a)
-    d_term = vec3.scale(I_d, k_d * max(0, L_dot_N))
+    d_term = vec3.scale(vec3.multiply(I_d, I_s), k_d * max(0, L_dot_N))
     s_term = vec3.scale(I_s, k_s * max(0, R_dot_V) ** material.shine)
 
     return vec3.vsum(a_term, d_term, s_term)
