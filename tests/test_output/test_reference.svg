@@ -2,21 +2,17 @@
   <defs>
     <mask id="letter_m_mask_mask">
       <rect x="-500" y="-500" width="1000" height="1000" fill="white"/>
-      <path id="letter_m_mask" transform="translate(183.60404,185.12055)scale(1.867800196078432)" d="M0,0 H11 L14,3 H 17 L20,0 H 29.5 L32.5,3 H 35.5 L38.5,0 H 48 L50,3 42,27 H 45 L5,30 H -7 L2,3 H -1Z" fill="black"/>
+      <path id="letter_m_hull" transform="translate(183.60404,185.12055)scale(1.867800196078432)" d="M0,0 H11 L14,3 H 17 L20,0 H 29.5 L32.5,3 H 35.5 L38.5,0 H 48 L50,3 42,27 H 45 L5,30 H -7 L2,3 H -1Z" fill="black"/>
     </mask>
   </defs>
   <g transform="translate(146.787475 146.90309)">
     <g mask="url(#letter_m_mask_mask)">
-      <path d="M134.9,0 0,134.9 -134.9,0 0,-134.9Z" fill="none" stroke="#000000" stroke-width="9.339001"/>
-      <path d="M126.414719,0 0,126.414719 -126.414719,0 0,-126.414719Z" fill="#009933"/>
-      <path d="M126.414719,0 0,126.414719 V134.9 L134.9,0Z" fill="#065422"/>
-      <path d="M0,126.414719 -126.414719,0 H -134.9 L0,134.9Z" fill="#0a8923"/>
-      <path d="M-126.414719,0 0,-126.414719 V-134.9 L-134.9,0Z" fill="#3cff2f"/>
-      <path d="M0,-126.414719 126.414719,0 H 134.9 L0,-134.9Z" fill="#19ff27"/>
-      <path d="M126.414719,0 0,126.414719 V134.9 L134.9,0Z" fill="none" stroke="#000000" stroke-width="0.25"/>
-      <path d="M0,126.414719 -126.414719,0 H -134.9 L0,134.9Z" fill="none" stroke="#000000" stroke-width="0.25"/>
-      <path d="M-126.414719,0 0,-126.414719 V-134.9 L-134.9,0Z" fill="none" stroke="#000000" stroke-width="0.25"/>
-      <path d="M0,-126.414719 126.414719,0 H 134.9 L0,-134.9Z" fill="none" stroke="#000000" stroke-width="0.25"/>
+      <path id="diamond_thick_outline" d="M134.9,0 0,134.9 -134.9,0 0,-134.9Z" fill="none" stroke="#000000" stroke-width="9.339001"/>
+      <path id="diamond_face" d="M126.414719,0 0,126.414719 -126.414719,0 0,-126.414719Z" fill="#009933"/>
+      <path id="diamond_bevel_0" d="M126.414719,0 0,126.414719 V134.9 L134.9,0Z" fill="#065422" stroke="#000000" stroke-width="0.25"/>
+      <path id="diamond_bevel_1" d="M0,126.414719 -126.414719,0 H -134.9 L0,134.9Z" fill="#0a8923" stroke="#000000" stroke-width="0.25"/>
+      <path id="diamond_bevel_2" d="M-126.414719,0 0,-126.414719 V-134.9 L-134.9,0Z" fill="#3cff2f" stroke="#000000" stroke-width="0.25"/>
+      <path id="diamond_bevel_3" d="M0,-126.414719 126.414719,0 H 134.9 L0,-134.9Z" fill="#19ff27" stroke="#000000" stroke-width="0.25"/>
     </g>
   </g>
   <g id="letter_v">
@@ -29,11 +25,11 @@
     <path id="v_face" d="M36,31.5 38.5,29 H 121.5 L124,31.5 V43.5 L121.5,46 H 107 V155.671523 L200,58.354417 V46 H 185.5 L183,43.5 V31.5 L185.5,29 H 268.5 L271,31.5 V40.035534 L72.5,247.75 H 55.5 L53,245.25 V46 H 38.5 L36,43.5Z" fill="#cccccc" stroke="#000000" stroke-width="0.25"/>
   </g>
   <g id="letter_i" transform="translate(183.60404,185.12055)scale(1.867800196078432)">
-    <path d="M-16.5,27 H -13.5 L-14.5,30 H -26.5 L-17.5,3 H -20.5 L-19.5,0 H -7.5Z M-4.5,-9 -6.5,-7.5 H -12.5 L-13.5,-9 -11.5,-15 -9.5,-16.5 H -3.5 L-2.5,-15Z" stroke="#000000" stroke-width="5"/>
-    <path d="M-16.5,27 H -13.5 L-14.5,30 H -26.5 L-17.5,3 H -20.5 L-19.5,0 H -7.5Z M-4.5,-9 -6.5,-7.5 H -12.5 L-13.5,-9 -11.5,-15 -9.5,-16.5 H -3.5 L-2.5,-15Z" fill="#cccccc"/>
+    <path id="i_outline" d="M-16.5,27 H -13.5 L-14.5,30 H -26.5 L-17.5,3 H -20.5 L-19.5,0 H -7.5Z M-4.5,-9 -6.5,-7.5 H -12.5 L-13.5,-9 -11.5,-15 -9.5,-16.5 H -3.5 L-2.5,-15Z" stroke="#000000" stroke-width="5"/>
+    <path id="i_face" d="M-16.5,27 H -13.5 L-14.5,30 H -26.5 L-17.5,3 H -20.5 L-19.5,0 H -7.5Z M-4.5,-9 -6.5,-7.5 H -12.5 L-13.5,-9 -11.5,-15 -9.5,-16.5 H -3.5 L-2.5,-15Z" fill="#cccccc"/>
   </g>
   <g id="letter_m" transform="translate(183.60404,185.12055)scale(1.867800196078432)">
-    <path d="M0,0 H11 L14,3 H 17 L20,0 H 29.5 L32.5,3 H 35.5 L38.5,0 H 48 L50,3 42,27 H 45 L44,30 H 32 L39,9 H 28.5 L22.5,27 H 25.5 L24.5,30 H 12.5 L19.5,9 H 9 L3,27 H 6 L5,30 H -7 L2,3 H -1Z" stroke="#000000" stroke-width="5"/>
-    <path d="M0,0 H11 L14,3 H 17 L20,0 H 29.5 L32.5,3 H 35.5 L38.5,0 H 48 L50,3 42,27 H 45 L44,30 H 32 L39,9 H 28.5 L22.5,27 H 25.5 L24.5,30 H 12.5 L19.5,9 H 9 L3,27 H 6 L5,30 H -7 L2,3 H -1Z" fill="#cccccc"/>
+    <path id="m_outline" d="M0,0 H11 L14,3 H 17 L20,0 H 29.5 L32.5,3 H 35.5 L38.5,0 H 48 L50,3 42,27 H 45 L44,30 H 32 L39,9 H 28.5 L22.5,27 H 25.5 L24.5,30 H 12.5 L19.5,9 H 9 L3,27 H 6 L5,30 H -7 L2,3 H -1Z" stroke="#000000" stroke-width="5"/>
+    <path id="m_face" d="M0,0 H11 L14,3 H 17 L20,0 H 29.5 L32.5,3 H 35.5 L38.5,0 H 48 L50,3 42,27 H 45 L44,30 H 32 L39,9 H 28.5 L22.5,27 H 25.5 L24.5,30 H 12.5 L19.5,9 H 9 L3,27 H 6 L5,30 H -7 L2,3 H -1Z" fill="#cccccc"/>
   </g>
 </svg>

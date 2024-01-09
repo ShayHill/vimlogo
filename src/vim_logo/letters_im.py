@@ -245,17 +245,11 @@ def _new_letter_m_mask() -> EtreeElement:
     """
     skewed = [[_skew_point(pt) for pt in _letter_m_mask_pts]]
     data_string = " ".join([new_data_string(pts) for pts in skewed])
-    return su.new_element("path", id="letter_m_mask", transform=M_TRANS, d=data_string)
+    return su.new_element("path", id="letter_m_hull", transform=M_TRANS, d=data_string)
 
 
 MED_STROKE_WIDTH = (_M_VOID - _BEVEL) * _SCALE_M * 1/3 * 2
 M_STROKE_WIDTH = MED_STROKE_WIDTH / _SCALE_M
-aaa = 3 
-
-
-
-    # skewed = vec2.vscale(skewed, _SCALE_M)
-    # skewed = vec2.vadd(skewed, _REF_M_TL)
 
 
 def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
@@ -267,13 +261,13 @@ def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
     """
     skewed = [[_skew_point(pt) for pt in pts] for pts in ptss]
     data_string = " ".join([new_data_string(pts) for pts in skewed])
-    group = su.new_element("g", id=name, transform=M_TRANS)
-    outline = su.new_sub_element(group, "path", d=data_string)
+    group = su.new_element("g", id_=f"letter_{name}", transform=M_TRANS)
+    outline = su.new_sub_element(group, "path", id_=f"{name}_outline", d=data_string)
     _ = su.update_element(outline, stroke=shared.MID_STROKE_COLOR, stroke_width=M_STROKE_WIDTH)
-    _ = su.new_sub_element(group, "path", d=data_string, fill=shared.VIM_GRAY)
+    _ = su.new_sub_element(group, "path", id_=f"{name}_face", d=data_string, fill=shared.VIM_GRAY)
     return group
 
 
 letter_m_mask = _new_letter_m_mask()
-letter_m = _new_letter("letter_m", _letter_m_pts)
-letter_i = _new_letter("letter_i", _letter_i_pts_stem, _letter_i_pts_dot)
+letter_m = _new_letter("m", _letter_m_pts)
+letter_i = _new_letter("i", _letter_i_pts_stem, _letter_i_pts_dot)

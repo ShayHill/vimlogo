@@ -111,25 +111,25 @@ def _new_diamond(rad: float) -> EtreeElement:
         bevels.append([inner[i], inner[(i + 1) % 4], outer[(i + 1) % 4], outer[i]])
     diamond = su.new_element("g")
     _ = su.new_sub_element(
-        diamond, "path", d=new_data_string(outer), fill="none", stroke=shared.MID_STROKE_COLOR, stroke_width=MED_STROKE_WIDTH
+        diamond, "path", id_="diamond_thick_outline", d=new_data_string(outer), fill="none", stroke=shared.MID_STROKE_COLOR, stroke_width=MED_STROKE_WIDTH
     )
     _ = su.new_sub_element(
-        diamond, "path", d=new_data_string(inner), fill=shared.VIM_GREEN
+        diamond, "path", id_="diamond_face", d=new_data_string(inner), fill=shared.VIM_GREEN
         # diamond, "path", d=new_data_string(inner), fill=illuminate((0, 0, 1), MATERIAL, *shared.LIGHT_SOURCES),
-
     )
-    for bevel in bevels:
+    for i, bevel in enumerate(bevels):
         normal = _get_bevel_surface_normal(bevel[0], bevel[1], BEVEL_SLOPE)
         _ = su.new_sub_element(
             diamond,
             "path",
+            id_ = f"diamond_bevel_{i}",
             d=new_data_string(bevel),
-            fill=illuminate(normal, MATERIAL, *shared.LIGHT_SOURCES),
+            fill=illuminate(normal, MATERIAL, *shared.LIGHT_SOURCES),**shared.PIN_STROKE
         )
-    for bevel in bevels:
-        _ = su.new_sub_element(
-            diamond, "path", d=new_data_string(bevel), fill="none", **shared.PIN_STROKE
-        )
+    # for bevel in bevels:
+    #     _ = su.new_sub_element(
+    #         diamond, "path", d=new_data_string(bevel), fill="none", **shared.PIN_STROKE
+    #     )
     return diamond
 
 
