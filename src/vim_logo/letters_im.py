@@ -19,6 +19,8 @@ import svg_ultralight as su
 from vim_logo.glyphs import new_data_string
 from vim_logo import shared
 
+import vec2_math as vec2
+
 if TYPE_CHECKING:
     from lxml.etree import _Element as EtreeElement  # type: ignore
 
@@ -71,7 +73,8 @@ def _relx_to_absx(pts: list[tuple[float, float]]) -> list[tuple[float, float]]:
 def _skew_point(pt: tuple[float, float]) -> tuple[float, float]:
     """Skew move x coordinate -1 pt for each 3 y pts."""
     x, y = pt
-    return x - y / 3, y
+    skewed = x - y / 3, y
+    return vec2.vscale(skewed, 1.9)
 
 
 # ===============================================================================
@@ -193,6 +196,8 @@ def _new_letter_m_mask() -> EtreeElement:
     return su.new_element("path", id="letter_m_mask", d=data_string)
 
 
+STROKE_WIDTH = (_M_VOID - _BEVEL) * 1.9  / 1.4
+
 def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
     """Create a `g` svg element for a small letter.
 
@@ -204,7 +209,7 @@ def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
     data_string = " ".join([new_data_string(pts) for pts in skewed])
     group = su.new_element("g", id=name)
     outline = su.new_sub_element(group, "path", d=data_string)
-    _ = su.update_element(outline, stroke=shared.MID_STROKE_COLOR, stroke_width=shared.MID_STROKE_WIDTH)
+    _ = su.update_element(outline, stroke=shared.MID_STROKE_COLOR, stroke_width=STROKE_WIDTH)
     _ = su.new_sub_element(group, "path", d=data_string, fill=shared.VIM_GRAY)
     return group
 

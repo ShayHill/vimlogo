@@ -268,12 +268,14 @@ def illuminate(
     Unlike the function uniform_shading_model, this function will normalize the
     normal_vector for you.
     """
+    material.ambient /= len(light_sources)
     normal_vector = vec3.normalize(normal_vector)
     colors = [
         uniform_shading_model(normal_vector, material, light_source)
         for light_source in light_sources
     ]
     sum_vector = vec3.clamp(vec3.vsum(*colors))
+    material.ambient *= len(light_sources)
     return _intensity_to_hex(sum_vector)
 
 

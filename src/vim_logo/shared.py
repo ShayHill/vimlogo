@@ -32,14 +32,34 @@ VIM_GREEN = "#009933"
 
 # the light source for V and diamond bevels
 
-_total_intensity = 8
+_total_intensity = 5
 _light_sources = 32
 
+LIGHT_SOURCES_WHITE: list[LightSource] = []
+intensity = 255 * _total_intensity / _light_sources
+color = rgb_to_hex((intensity, intensity, intensity))
+pnt_a = (-24, -10, 2)
+pnt_b = (5, -24, 2)
+for i in range(_light_sources):
+    time = i / (_light_sources - 1)
+    contrib_a = vec3.scale(pnt_a, 1 - time)
+    contrib_b = vec3.scale(pnt_b, time)
+    pnt = vec3.add(contrib_a, contrib_b)
+    print(pnt)
+    LIGHT_SOURCES_WHITE.append(LightSource(color, pnt))
+
+    # LightSource(color, (-9, -12, 9)),
+    # LightSource("#ffffff", (-9, -12, 9)),
+    # # LightSource("#ffffff", (-9, -12, 24)),
+# ]
+
+_total_intensity = 5 
+_light_sources = 32
 LIGHT_SOURCES: list[LightSource] = []
 intensity = 255 * _total_intensity / _light_sources
-color = rgb_to_hex((intensity, intensity, intensity / 4))
-pnt_a = (-24, 0, 2)
-pnt_b = (15, -24, 2)
+color = rgb_to_hex((intensity, intensity, intensity / 16))
+# pnt_a = (-24, 0, 2)
+# pnt_b = (15, -24, 2)
 for i in range(_light_sources):
     time = i / (_light_sources - 1)
     contrib_a = vec3.scale(pnt_a, 1 - time)
@@ -47,9 +67,3 @@ for i in range(_light_sources):
     pnt = vec3.add(contrib_a, contrib_b)
     print(pnt)
     LIGHT_SOURCES.append(LightSource(color, pnt))
-
-    # LightSource(color, (-9, -12, 9)),
-    # LightSource("#ffffff", (-9, -12, 9)),
-    # # LightSource("#ffffff", (-9, -12, 24)),
-# ]
-

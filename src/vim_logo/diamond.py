@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 Vec2 = tuple[float, float]
 
 Z_BEVEL = 3 * 2
-BEVEL_SLOPE = 4
+BEVEL_SLOPE = 8
 
 
 def _push_hsl(color: str, hue_shift: float=0, sat_shift: float=0, lit_shift: float=0) -> str:
@@ -52,16 +52,15 @@ def _push_hsl(color: str, hue_shift: float=0, sat_shift: float=0, lit_shift: flo
 MATERIAL = set_material_color(
     (0, 0, 1),
     Material(
-        _push_hsl(shared.VIM_GREEN, hue_shift=5, sat_shift=-50, lit_shift=00),
-        ambient=1/2,
-        diffuse=8.5,
-        specular=1,
+        _push_hsl(shared.VIM_GREEN, hue_shift=1, sat_shift=-20, lit_shift=4),
+        ambient=3.5,
+        diffuse=6,
+        specular=.5,
         hue_shift=0.0,
         sat_shift=0,
     ),
-    *shared.LIGHT_SOURCES,
+    *shared.LIGHT_SOURCES_WHITE,
 )
-
 
 
 def _get_bevel_surface_normal(
