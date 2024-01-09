@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 
 # smaller bevels of the letter i dot
-_I_DOT_BEVEL = 1
+_I_DOT_BEVEL = 1.5
 
 # larger bevels and height / width of the serifs
 _BEVEL = 3
@@ -52,8 +52,33 @@ _H_LINES = [
 #   Path transformations
 # ===============================================================================
 
+from vim_logo.reference_paths import ref_m
+
+_REF_M_TL = ref_m[0]
+_REF_M_R = 276.99076
+_REF_M_B = 179.43305
+
+_REF_M_W = ref_m[1][0] - ref_m[-1][0]
+_REF_M_H = ref_m[13][1] - ref_m[0][1]
+_SCALE_M = _REF_M_W / 51
+
+# _MODEL_HEIGHT = 30
+# _MODEL_M_WIDTH = 51
+
+aaa = _REF_M_W / 51
+bbb = _REF_M_H / 30
+ys = sorted({y for x, y in ref_m})
+min_x = min(x for x, y in ref_m if y in ys[1:3])
+max_x = max(x for x, y in ref_m if y in ys[1:3])
+min_y = min(y for x, y in ref_m)
+max_y = max(y for x, y in ref_m)
+_SCALE_M = (max_x - min_x) / 51
+ddd = (max_y - min_y) / 30
+
+
+
 TX = 17 * 7.6
-TY = 17 * 5.75
+TY = 16.9 * 5.75
 
 
 def _relx_to_absx(pts: list[tuple[float, float]]) -> list[tuple[float, float]]:
@@ -74,7 +99,9 @@ def _skew_point(pt: tuple[float, float]) -> tuple[float, float]:
     """Skew move x coordinate -1 pt for each 3 y pts."""
     x, y = pt
     skewed = x - y / 3, y
-    return vec2.vscale(skewed, 1.9)
+    # skewed = vec2.vscale(skewed, _SCALE_M)
+    # skewed = vec2.vadd(skewed, _REF_M_TL)
+    return skewed
 
 
 # ===============================================================================
@@ -86,9 +113,24 @@ def _skew_point(pt: tuple[float, float]) -> tuple[float, float]:
 _curved_top = [
     (_STROKE_BOT - _BEVEL, _H_LINES[2]),
     (_BEVEL, _H_LINES[3]),
-    (_M_VOID - _BEVEL * 2, _H_LINES[3]),
-    (_BEVEL, _H_LINES[2]),
+    (_M_VOID - _BEVEL * 2 + 1, _H_LINES[3]),
+    (_BEVEL - 1, _H_LINES[2]),
 ]
+
+dou = [4, 3, 2]
+
+PUSH = 1.5
+TOP_CURVE = (48 - PUSH - sum(dou) * 2) / 3
+_curved_top = [
+    (TOP_CURVE, _H_LINES[2]),
+    (dou[0], _H_LINES[3]),
+    (dou[1], _H_LINES[3]),
+    (dou[2], _H_LINES[2])]
+
+
+# breakpoint()
+
+
 
 # just above the bottom serif on an m leg to just above the bottom serif on the next
 # leg. There are two and a half of these in the letter m. This is also used as a
@@ -110,9 +152,12 @@ _bottom_leg = [
 _letter_m_pts = [
     # topmost, leftmost point on top serif
     (0, _H_LINES[2]),
+    (PUSH, _H_LINES[2]),
+    # (_BEVEL, _H_LINES[2]),
     *_curved_top,
     *_curved_top,
-    *_curved_top[:2],
+    *_curved_top[:1],
+    (_BEVEL, _H_LINES[3]),
     # rigth vertical line top to bottom
     (0, _H_LINES[5]),
     *_bottom_leg,
@@ -122,6 +167,12 @@ _letter_m_pts = [
     (0, _H_LINES[3]),
     (-_BEVEL, _H_LINES[3]),
 ]
+
+
+# aaa = sum(x[0] for x in _letter_m_pts[:11])
+# bbb = sum(x[0] for x in _curved_top[:4])
+# ccc = sum(x[0] for x in _curved_top[:2])
+# breakpoint()
 
 _letter_m_pts = _relx_to_absx(_letter_m_pts)
 
@@ -179,11 +230,12 @@ _letter_i_pts_dot = _relx_to_absx(_letter_i_pts_dot)
 #   Create `g` elements for the letters i and m
 # ===============================================================================
 
-_letter_m_pts = [(x + TX, y + TY) for x, y in _letter_m_pts]
-_letter_m_mask_pts = [(x + TX, y + TY) for x, y in _letter_m_mask_pts]
-_letter_i_pts_dot = [(x + TX, y + TY) for x, y in _letter_i_pts_dot]
-_letter_i_pts_stem = [(x + TX, y + TY) for x, y in _letter_i_pts_stem]
+# _letter_m_pts = [(x + TX, y + TY) for x, y in _letter_m_pts]
+# _letter_m_mask_pts = [(x + TX, y + TY) for x, y in _letter_m_mask_pts]
+# _letter_i_pts_dot = [(x + TX, y + TY) for x, y in _letter_i_pts_dot]
+# _letter_i_pts_stem = [(x + TX, y + TY) for x, y in _letter_i_pts_stem]
 
+M_TRANS = f"translate({_REF_M_TL[0]},{_REF_M_TL[1]})scale({_SCALE_M})"
 
 def _new_letter_m_mask() -> EtreeElement:
     """Create a `path` element of the letter m mask.
@@ -193,10 +245,18 @@ def _new_letter_m_mask() -> EtreeElement:
     """
     skewed = [[_skew_point(pt) for pt in _letter_m_mask_pts]]
     data_string = " ".join([new_data_string(pts) for pts in skewed])
-    return su.new_element("path", id="letter_m_mask", d=data_string)
+    return su.new_element("path", id="letter_m_mask", transform=M_TRANS, d=data_string)
 
 
-STROKE_WIDTH = (_M_VOID - _BEVEL) * 1.9  / 1.4
+MED_STROKE_WIDTH = (_M_VOID - _BEVEL) * _SCALE_M * 1/3 * 2
+M_STROKE_WIDTH = MED_STROKE_WIDTH / _SCALE_M
+aaa = 3 
+
+
+
+    # skewed = vec2.vscale(skewed, _SCALE_M)
+    # skewed = vec2.vadd(skewed, _REF_M_TL)
+
 
 def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
     """Create a `g` svg element for a small letter.
@@ -207,9 +267,9 @@ def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
     """
     skewed = [[_skew_point(pt) for pt in pts] for pts in ptss]
     data_string = " ".join([new_data_string(pts) for pts in skewed])
-    group = su.new_element("g", id=name)
+    group = su.new_element("g", id=name, transform=M_TRANS)
     outline = su.new_sub_element(group, "path", d=data_string)
-    _ = su.update_element(outline, stroke=shared.MID_STROKE_COLOR, stroke_width=STROKE_WIDTH)
+    _ = su.update_element(outline, stroke=shared.MID_STROKE_COLOR, stroke_width=M_STROKE_WIDTH)
     _ = su.new_sub_element(group, "path", d=data_string, fill=shared.VIM_GRAY)
     return group
 

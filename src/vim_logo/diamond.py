@@ -16,6 +16,7 @@ from vim_logo import vec3
 from vim_logo.glyphs import new_data_string
 from vim_logo.illumination import LightSource, Material, illuminate, set_material_color
 from vim_logo import shared
+from vim_logo.letters_im import MED_STROKE_WIDTH
 
 
 from basic_colormath import rgb_to_hsl, hsl_to_rgb, rgb_to_hex, hex_to_rgb
@@ -110,7 +111,7 @@ def _new_diamond(rad: float) -> EtreeElement:
         bevels.append([inner[i], inner[(i + 1) % 4], outer[(i + 1) % 4], outer[i]])
     diamond = su.new_element("g")
     _ = su.new_sub_element(
-        diamond, "path", d=new_data_string(outer), fill="none", **shared.MID_STROKE
+        diamond, "path", d=new_data_string(outer), fill="none", stroke=shared.MID_STROKE_COLOR, stroke_width=MED_STROKE_WIDTH
     )
     _ = su.new_sub_element(
         diamond, "path", d=new_data_string(inner), fill=shared.VIM_GREEN
