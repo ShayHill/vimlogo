@@ -28,7 +28,7 @@ from basic_colormath import (
 )
 from paragraphs import par
 
-from vim_logo import vec3
+from vim_logo import shared, vec3
 from vim_logo.vec3 import Vec3
 
 RGB = Annotated[tuple[int, int, int], [0, 255]]
@@ -167,8 +167,6 @@ class Material(_SetsColor):
     ambient: float
     diffuse: float
     specular: float
-    hue_shift: float
-    sat_shift: float
     shine: float = _SHINE_IS_MEANINGLESS_FOR_BEVELS
 
     def __init__(
@@ -177,9 +175,6 @@ class Material(_SetsColor):
         ambient: float = 0.1,
         diffuse: float = 0.6,
         specular: float = 0.3,
-        hue_shift: float = 0.0,
-        sat_shift: float = 50
-        # TODO: implement hue_shift
     ) -> None:
         """Initialize a material.
 
@@ -204,7 +199,6 @@ class Material(_SetsColor):
         self.ambient = ambient / sum_illumination
         self.diffuse = diffuse / sum_illumination
         self.specular = specular / sum_illumination
-        self.sat_shift = sat_shift
         self.shine = 1
 
 
@@ -267,6 +261,9 @@ def illuminate(
 
     Unlike the function uniform_shading_model, this function will normalize the
     normal_vector for you.
+
+    When using multiple light sources, the diffuse and specular animations will
+    stack, the ambient will not.
     """
     material.ambient /= len(light_sources)
     normal_vector = vec3.normalize(normal_vector)
@@ -290,7 +287,7 @@ def set_material_color(
     :return: None
 
     Reset the material color so that the output color in these lighting conditions is
-    equal to the input material color.
+    equal to the input material color. Uses a brute force method.
     """
     goal_color = material.rgb_color
 
@@ -313,15 +310,81 @@ def set_material_color(
     while True:
         material.rgb_color = (candidate[0], candidate[1], candidate[2])
         attempt = hex_to_rgb(illuminate(normal_vector, material, *light_sources))
-        # if any(x > y for x, y in zip(attempt, goal_color)):
-        #     msg = par(
-        #         f"""Unexpected (floating-point?) error. Failed to duplicate
-        #         {goal_color}. Reached {material.rgb_color}."""
-        #     )
-        #     raise RuntimeError(msg)
         if all(x >= y for x, y in zip(attempt, goal_color)):
             break
         for i in range(3):
             if attempt[i] < goal_color[i]:
                 candidate[i] += 1
     return material
+
+
+# the light source for V and diamond bevels
+
+_total_intensity = 5
+_light_sources = 32
+
+LIGHT_SOURCES_WHITE: list[LightSource] = []
+intensity = 255 * _total_intensity / _light_sources
+color = rgb_to_hex((intensity, intensity, intensity))
+pnt_a = (-24, -10, 2)
+pnt_b = (5, -24, 2)
+for i in range(_light_sources):
+    time = i / (_light_sources - 1)
+    contrib_a = vec3.scale(pnt_a, 1 - time)
+    contrib_b = vec3.scale(pnt_b, time)
+    pnt = vec3.add(contrib_a, contrib_b)
+    print(pnt)
+    LIGHT_SOURCES_WHITE.append(LightSource(color, pnt))
+
+    # LightSource(color, (-9, -12, 9)),
+    # LightSource("#ffffff", (-9, -12, 9)),
+    # # LightSource("#ffffff", (-9, -12, 24)),
+# ]
+
+_total_intensity = 5 
+_light_sources = 32
+LIGHT_SOURCES: list[LightSource] = []
+intensity = 255 * _total_intensity / _light_sources
+color = rgb_to_hex((intensity, intensity, intensity / 16))
+# pnt_a = (-24, 0, 2)
+# pnt_b = (15, -24, 2)
+for i in range(_light_sources):
+    time = i / (_light_sources - 1)
+    contrib_a = vec3.scale(pnt_a, 1 - time)
+    contrib_b = vec3.scale(pnt_b, time)
+    pnt = vec3.add(contrib_a, contrib_b)
+    print(pnt)
+    LIGHT_SOURCES.append(LightSource(color, pnt))
+
+
+
+def _push_hsl(
+    color: str, hue_shift: float = 0, sat_shift: float = 0, lit_shift: float = 0
+) -> str:
+    """Shift the hue, saturation, and lightness of a color.
+
+    :param color: hex color str, e.g., "#ff3322"
+    :param hue_shift: -365 to 365, maximum amount to change hue
+    :param sat_shift: -100 to 100, maximum amount to change saturation
+    :param lit_shift: -100 to 100, maximum amount to change lightness
+    :return: (r, g, b)
+
+    The intermediate hue, sat, and lit values are in the ranges
+    [0, 365), [0, 100], and [0, 100].
+    """
+    hue, sat, lit = rgb_to_hsl(hex_to_rgb(color))
+    hue = (hue + hue_shift) % 365
+    sat = max(0, min(100, sat + sat_shift))
+    lit = max(0, min(100, lit + lit_shift))
+    return rgb_to_hex(hsl_to_rgb((hue, sat, lit)))
+
+diamond_material = set_material_color(
+    (0, 0, 1),
+    Material(
+        _push_hsl(shared.VIM_GREEN, hue_shift=20, sat_shift=-20, lit_shift=4),
+        ambient=3.5,
+        diffuse=5,
+        specular=1.5,
+    ),
+    *LIGHT_SOURCES_WHITE,
+)

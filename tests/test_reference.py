@@ -61,12 +61,11 @@ def test_reference():
     _ = su.update_element(letter_m_mask, fill="black")
     mask.append(letter_m_mask)
 
-
     for element in [diamond]:
-        transform_g = su.new_sub_element(root, 'g', transform=transform_3)
+        transform_g = su.new_sub_element(root, 'g')
+        _ = su.update_element(transform_g, mask="url(#letter_m_mask_mask)")
         elem = copy.deepcopy(element)
-        # _ = su.update_element(elem, transform=transform_3)
-        _ = su.update_element(elem, mask="url(#letter_m_mask_mask)")
+        _ = su.update_element(elem, transform=transform_3)
         transform_g.append(elem)
         # root.append(elem)
 

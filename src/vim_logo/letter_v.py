@@ -78,25 +78,67 @@ from offset_poly.offset import PolyType
 
 from vim_logo import shared
 from vim_logo.glyphs import new_data_string
+from vim_logo.reference_paths import ref_v, get_footprint, get_dims, ref_v_oline, ref_v_bevels
+
 
 if TYPE_CHECKING:
     from lxml.etree import _Element as EtreeElement  # type: ignore
 
 TWO_VEC2 = tuple[tuple[float, float], tuple[float, float]]
 
+
+# ===============================================================================
+#   dimensions and parameters hand-tuned
+# ===============================================================================
+
+# The small bevels on the xy plane. The larger bevels size is a function of this in
+# order to make the impossible bevels with the correct angles.
 XY_BEVEL = 2.5
-V_WIDTH = 235
-V_HEIGHT = 218.75
-ABx = 88
-BCy = 17
-CDx = 17
-LMx = BCy + XY_BEVEL
 
 # For a right-angle corner A, B, C, set bevel width so the first bevel point will be
-# collinear with BC and second bevel point collinear with AB
+# collinear with BC and second bevel point collinear with AB. This z bevel is only
+# used for serifs and the bottom of the V.
 Z_BEVEL = XY_BEVEL * math.sin(3 / 8 * math.pi) / math.sin(1 / 8 * math.pi)
+
+# z bevels for outsides of the V strokes
 Z_BEVEL_MID = Z_BEVEL + XY_BEVEL / 2
+
+# z bevels for insides of the V strokes
 Z_BEVEL_FAT = Z_BEVEL + XY_BEVEL
+
+# ===============================================================================
+#   dimensions and parameters inferred from reference image
+# ===============================================================================
+
+# reference width and height of the face of the letter V
+V_WIDTH, V_HEIGHT = get_dims(ref_v)
+
+# the strokes are half underneath the bevels, so using both sides of the outline
+# footprint will give the corrent 2x stroke width.
+_V_STROKE_WIDTH = get_dims(ref_v_oline)[0] - get_dims(ref_v_bevels)[0]
+
+_left_serif = ref_v[-3:] + ref_v[:7]
+_right_serif = ref_v[9:17]
+_bot_flat = ref_v[17:20]
+
+# average width of the top serifs
+ABx = (get_dims(_left_serif)[0] + get_dims(_right_serif)[0]) / 2
+
+# average the height of the top serifs
+BCy = (get_dims(_left_serif)[1] + get_dims(_right_serif)[1]) / 2
+
+# average distance between serif sides and v strokes. The wider overhang on the right
+# side of the top, left serif is ignored, as the character of the original is much
+# better captured with the proportions of the left sides of the top serifs.
+CDx = (get_dims(_left_serif[:3])[0] + get_dims(_right_serif[:3])[0]) / 2
+
+# the flat bottom of the V
+LMx = get_dims(_bot_flat)[0]
+
+# the height of the short side of the right serif of the V
+JKy = get_dims(ref_v[14:17])[1]
+
+
 
 
 def _get_ray_intersection(ray_a: TWO_VEC2, ray_b: TWO_VEC2) -> tuple[float, float]:
@@ -143,9 +185,8 @@ def _get_letter_v_rough_outline() -> list[tuple[float, float]]:
     pnt_d = vec2.vadd(pnt_c, (-CDx, 0))
 
     # point k is a little higher than the others to make the right side of the V a
-    # bit pointier. I made it a function of the bevel widths, which gets me very
-    # close to the vim.org logo, but the actual measurement is probably arbitrary.
-    pnt_k = vec2.vadd(pnt_j, (0, XY_BEVEL * 2 + Z_BEVEL))
+    # bit pointier.
+    pnt_k = vec2.vadd(pnt_j, (0, JKy))
 
     # points on the bottom of the V, left to right.
     pnt_m = (CDx, V_HEIGHT)
@@ -169,7 +210,7 @@ def _get_letter_v_rough_outline() -> list[tuple[float, float]]:
     # fmt: on
 
 
-def bevel_90_turns(pts: list[tuple[float, float]]) -> list[tuple[float, float]]:
+def _bevel_90_turns(pts: list[tuple[float, float]]) -> list[tuple[float, float]]:
     """Find any 90-degree turns in a list of points and replace them with a bevel."""
     new_pts: list[tuple[float, float]] = []
     for a, b, c in zip(pts[-1:] + pts[:-1], pts, pts[1:] + pts[:1]):
@@ -188,7 +229,7 @@ def _bevel_and_refine_letter_v_outline(
     pts: list[tuple[float, float]]
 ) -> tuple[list[tuple[float, float]], list[tuple[float, float]]]:
     """Refine the letter V outline to match the vim.org logo."""
-    pts = bevel_90_turns(pts)
+    pts = _bevel_90_turns(pts)
     inner = pts
     outer = [x.xsect for x in offset_polygon(inner, -Z_BEVEL)]
     bevels = [-Z_BEVEL] * (len(inner) - 1)
@@ -228,7 +269,13 @@ def _new_letter_v() -> EtreeElement:
         """Add a new subelement path to letter_v."""
         _ = su.new_sub_element(letter_v, "path", id_=id_, d=d, **attributes)
 
-    add_path(id_="v_outline", d=d_outer, fill="none", **shared.FAT_STROKE)
+    add_path(
+        id_="v_outline",
+        d=d_outer,
+        fill="none",
+        stroke=shared.FAT_STROKE_COLOR,
+        stroke_width=_V_STROKE_WIDTH
+    )
     add_path(id_="v_lit_bevels", d=d_outer, fill=shared.GRAY_LIT, **shared.PIN_STROKE)
 
     # begin dim bevels
@@ -244,6 +291,7 @@ def _new_letter_v() -> EtreeElement:
     # end dim bevels
 
     add_path(id_="v_face", d=d_inner, fill=shared.VIM_GRAY, **shared.PIN_STROKE)
+
     return letter_v
 
 

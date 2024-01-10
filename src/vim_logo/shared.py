@@ -4,7 +4,6 @@
 :created: 2024-01-03
 """
 
-from vim_logo.illumination import LightSource
 from vim_logo import vec3
 import vec2_math as vec2
 from basic_colormath import rgb_to_hex
@@ -21,7 +20,7 @@ MID_STROKE = {"stroke": MID_STROKE_COLOR, "stroke-width": MID_STROKE_WIDTH}
 
 # the tiny pinstripes on the bevels of the V and diamond
 PIN_STROKE_COLOR = "#000000"
-PIN_STROKE_WIDTH = 1 / 4
+PIN_STROKE_WIDTH = 0.216 # copied from reference svg. Consistently used there.
 PIN_STROKE = {"stroke": PIN_STROKE_COLOR, "stroke-width": PIN_STROKE_WIDTH}
 
 # colors for V, im, and diamond
@@ -30,40 +29,3 @@ GRAY_LIT = "#ffffff"
 GRAY_DIM = "#7f7f7f"
 VIM_GREEN = "#009933"
 
-# the light source for V and diamond bevels
-
-_total_intensity = 5
-_light_sources = 32
-
-LIGHT_SOURCES_WHITE: list[LightSource] = []
-intensity = 255 * _total_intensity / _light_sources
-color = rgb_to_hex((intensity, intensity, intensity))
-pnt_a = (-24, -10, 2)
-pnt_b = (5, -24, 2)
-for i in range(_light_sources):
-    time = i / (_light_sources - 1)
-    contrib_a = vec3.scale(pnt_a, 1 - time)
-    contrib_b = vec3.scale(pnt_b, time)
-    pnt = vec3.add(contrib_a, contrib_b)
-    print(pnt)
-    LIGHT_SOURCES_WHITE.append(LightSource(color, pnt))
-
-    # LightSource(color, (-9, -12, 9)),
-    # LightSource("#ffffff", (-9, -12, 9)),
-    # # LightSource("#ffffff", (-9, -12, 24)),
-# ]
-
-_total_intensity = 5 
-_light_sources = 32
-LIGHT_SOURCES: list[LightSource] = []
-intensity = 255 * _total_intensity / _light_sources
-color = rgb_to_hex((intensity, intensity, intensity / 16))
-# pnt_a = (-24, 0, 2)
-# pnt_b = (15, -24, 2)
-for i in range(_light_sources):
-    time = i / (_light_sources - 1)
-    contrib_a = vec3.scale(pnt_a, 1 - time)
-    contrib_b = vec3.scale(pnt_b, time)
-    pnt = vec3.add(contrib_a, contrib_b)
-    print(pnt)
-    LIGHT_SOURCES.append(LightSource(color, pnt))

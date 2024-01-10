@@ -10,16 +10,26 @@ from typing import TYPE_CHECKING
 
 import svg_ultralight as su
 import vec2_math as vec2
+from basic_colormath import hex_to_rgb, hsl_to_rgb, rgb_to_hex, rgb_to_hsl
 from offset_poly import offset_polygon
 
-from vim_logo import vec3
+from vim_logo import shared, vec3
 from vim_logo.glyphs import new_data_string
-from vim_logo.illumination import LightSource, Material, illuminate, set_material_color
-from vim_logo import shared
+from vim_logo.illumination import (
+    LIGHT_SOURCES,
+    LightSource,
+    Material,
+    diamond_material,
+    illuminate,
+    set_material_color,
+)
 from vim_logo.letters_im import MED_STROKE_WIDTH
-
-
-from basic_colormath import rgb_to_hsl, hsl_to_rgb, rgb_to_hex, hex_to_rgb
+from vim_logo.reference_paths import (
+    get_dims,
+    ref_diamond_inner,
+    ref_diamond_oline,
+    ref_diamond_outer,
+)
 
 if TYPE_CHECKING:
     from lxml.etree import _Element as EtreeElement  # type: ignore
@@ -28,40 +38,34 @@ if TYPE_CHECKING:
 
 Vec2 = tuple[float, float]
 
-Z_BEVEL = 3 * 2
-BEVEL_SLOPE = 8
+
+# ===============================================================================
+#   dimensions and parameters hand-tuned
+# ===============================================================================
 
 
-def _push_hsl(color: str, hue_shift: float=0, sat_shift: float=0, lit_shift: float=0) -> str:
-    """Shift the hue, saturation, and lightness of a color.
+# effects the calculated surface normal of the bevels and thus the illumination.
+# Increase this to maked the bevels less colorful.
+_BEVEL_SLOPE = 1.5
 
-    :param color: hex color str, e.g., "#ff3322"
-    :param hue_shift: -365 to 365, maximum amount to change hue
-    :param sat_shift: -100 to 100, maximum amount to change saturation
-    :param lit_shift: -100 to 100, maximum amount to change lightness
-    :return: (r, g, b)
+_STROKE_COLOR = "#000000"
 
-    The intermediate hue, sat, and lit values are in the ranges
-    [0, 365), [0, 100], and [0, 100].
-    """
-    hue, sat, lit = rgb_to_hsl(hex_to_rgb(color))
-    hue = (hue + hue_shift) % 365
-    sat = max(0, min(100, sat + sat_shift))
-    lit = max(0, min(100, lit + lit_shift))
-    return rgb_to_hex(hsl_to_rgb((hue, sat, lit)))
 
-MATERIAL = set_material_color(
-    (0, 0, 1),
-    Material(
-        _push_hsl(shared.VIM_GREEN, hue_shift=1, sat_shift=-20, lit_shift=4),
-        ambient=3.5,
-        diffuse=6,
-        specular=.5,
-        hue_shift=0.0,
-        sat_shift=0,
-    ),
-    *shared.LIGHT_SOURCES_WHITE,
-)
+# ===============================================================================
+#   dimensions and parameters inferred from reference image
+# ===============================================================================
+
+# outside (of bevels) diameter (point to point through the center) of the diamond
+_OD = sum(get_dims(ref_diamond_outer)) / 2
+
+# inside (of bevels) diameter (point to point through the center) of the diamond face
+_ID = sum(get_dims(ref_diamond_inner)) / 2
+
+# stroke width diameter (point to point through the center) of the diamond. In the
+# reference image, the fat, black stroke around the diamond is a black polygon
+# itself, not a stroke of a polygon.
+_SD = sum(get_dims(ref_diamond_oline)) / 2
+_STROKE_WIDTH = (_SD - _OD) / pow(2, 1 / 2)
 
 
 def _get_bevel_surface_normal(
@@ -72,12 +76,10 @@ def _get_bevel_surface_normal(
     :param pnt_a2: one point on the inside edge of the bevel (xy plane)
     :param pnt_b2: point clockwise from pnt_a on the inside edge of the bevel
         (xy plane)
-    :param slope: slope of the bevel. This will be usually be negative, because pnt_a
-        and pnt_b will be on the inside edge (which is usually higher).
+    :param slope: slope of the bevel. This is the slope of the bevels from outside
+        in, so a positive number.
 
-    This is different from most modelling code I've done, because faces in the Vim
-    logo are defined a) clockwise and b) in a right-handed coordinate system. I
-    usually do the opposite, but I've kept the Vim convention this time.
+    Faces are defined clockwise in a right-handed coordinate system.
     """
     vec_ab2 = vec2.vsub(pnt_a2, pnt_b2)
     vec_ac2 = vec2.set_norm(vec2.qrotate(vec_ab2, 3))
@@ -102,35 +104,42 @@ def _get_diamond_points(rad: float) -> list[tuple[float, float]]:
     return [(rad, 0), (0, rad), (-rad, 0), (0, -rad)]
 
 
-def _new_diamond(rad: float) -> EtreeElement:
+def _new_diamond() -> EtreeElement:
     """Return a diamond element."""
-    outer = _get_diamond_points(rad)
-    inner = [x.xsect for x in offset_polygon(outer, Z_BEVEL)]
+    outer = _get_diamond_points(_OD / 2)
+    inner = _get_diamond_points(_ID / 2)
+
     bevels: list[list[Vec2]] = []
     for i in range(4):
         bevels.append([inner[i], inner[(i + 1) % 4], outer[(i + 1) % 4], outer[i]])
     diamond = su.new_element("g")
     _ = su.new_sub_element(
-        diamond, "path", id_="diamond_thick_outline", d=new_data_string(outer), fill="none", stroke=shared.MID_STROKE_COLOR, stroke_width=MED_STROKE_WIDTH
+        diamond,
+        "path",
+        id_="diamond_thick_outline",
+        d=new_data_string(outer),
+        fill="none",
+        stroke=_STROKE_COLOR,
+        stroke_width=_STROKE_WIDTH,
     )
     _ = su.new_sub_element(
-        diamond, "path", id_="diamond_face", d=new_data_string(inner), fill=shared.VIM_GREEN
-        # diamond, "path", d=new_data_string(inner), fill=illuminate((0, 0, 1), MATERIAL, *shared.LIGHT_SOURCES),
+        diamond,
+        "path",
+        id_="diamond_face",
+        d=new_data_string(inner),
+        fill=shared.VIM_GREEN
     )
     for i, bevel in enumerate(bevels):
-        normal = _get_bevel_surface_normal(bevel[0], bevel[1], BEVEL_SLOPE)
+        normal = _get_bevel_surface_normal(bevel[0], bevel[1], _BEVEL_SLOPE)
         _ = su.new_sub_element(
             diamond,
             "path",
-            id_ = f"diamond_bevel_{i}",
+            id_=f"diamond_bevel_{i}",
             d=new_data_string(bevel),
-            fill=illuminate(normal, MATERIAL, *shared.LIGHT_SOURCES),**shared.PIN_STROKE
+            fill=illuminate(normal, diamond_material, *LIGHT_SOURCES),
+            **shared.PIN_STROKE,
         )
-    # for bevel in bevels:
-    #     _ = su.new_sub_element(
-    #         diamond, "path", d=new_data_string(bevel), fill="none", **shared.PIN_STROKE
-    #     )
     return diamond
 
 
-diamond = _new_diamond(71 * 1.9)
+diamond = _new_diamond()
