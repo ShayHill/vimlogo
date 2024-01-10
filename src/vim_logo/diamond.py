@@ -12,6 +12,7 @@ import svg_ultralight as su
 import vec2_math as vec2
 from basic_colormath import hex_to_rgb, hsl_to_rgb, rgb_to_hex, rgb_to_hsl
 from offset_poly import offset_polygon
+from vim_logo import params_diamond as params
 
 from vim_logo import shared, vec3
 from vim_logo.glyphs import new_data_string
@@ -39,33 +40,12 @@ if TYPE_CHECKING:
 Vec2 = tuple[float, float]
 
 
-# ===============================================================================
-#   dimensions and parameters hand-tuned
-# ===============================================================================
 
-
-# effects the calculated surface normal of the bevels and thus the illumination.
-# Increase this to maked the bevels less colorful.
-_BEVEL_SLOPE = 1.5
-
-_STROKE_COLOR = "#000000"
-
-
-# ===============================================================================
-#   dimensions and parameters inferred from reference image
-# ===============================================================================
-
-# outside (of bevels) diameter (point to point through the center) of the diamond
-_OD = sum(get_dims(ref_diamond_outer)) / 2
-
-# inside (of bevels) diameter (point to point through the center) of the diamond face
-_ID = sum(get_dims(ref_diamond_inner)) / 2
-
-# stroke width diameter (point to point through the center) of the diamond. In the
-# reference image, the fat, black stroke around the diamond is a black polygon
-# itself, not a stroke of a polygon.
-_SD = sum(get_dims(ref_diamond_oline)) / 2
-_STROKE_WIDTH = (_SD - _OD) / pow(2, 1 / 2)
+_STROKE_COLOR = shared.MID_STROKE_COLOR
+_BEVEL_SLOPE = params.BEVEL_SLOPE
+_OD = params.OD
+_ID = params.ID
+_STROKE_WIDTH = params.STROKE_WIDTH
 
 _DIAMOND_TRANS = "translate({} {})".format(*shared.VIEW_CENTER)
 

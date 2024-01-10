@@ -1,7 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" viewBox="0 0 293.57495 293.80619" width="293.57495" height="293.80619">
+  <g mask="url(#letter_m_mask)">
+    <path id="diamond_background" d="M134.640626,0 0,134.640626 -134.640626,0 0,-134.640626Z" fill="none" stroke="#ff0000" stroke-width="16.086678" transform="translate(146.787475 146.903095)"/>
+  </g>
+  <path id="letter_v_background" d="M-6.035534,0 0,-6.035534 H 88.37891 L94.414444,0 V17.027345 L88.37891,23.062879 H 79.887099 V104.697771 L158.154827,23.062879 H 146.91407 L140.878536,17.027345 V0 L146.91407,-6.035534 H 235.29298 L241.328514,0 V15.607075 L41.204901,224.340227 H 17.027345 L9.741811,217.054693 V23.062879 H 0 L-6.035534,17.027345Z" fill="none" stroke="#ff0000" stroke-width="19.273799" transform="translate(35.64699999999999 29.097106999999994)"/>
+  <path id="letter_m_background" d="M0,0 H11 L14,3 H 17 L20,0 H 29.5 L32.5,3 H 35.5 L38.5,0 H 48 L50,3 42,27 H 45 L44,30 H 32 L39,9 H 28.5 L22.5,27 H 25.5 L24.5,30 H 12.5 L19.5,9 H 9 L3,27 H 6 L5,30 H -7 L2,3 H -1Z" stroke="#ff0000" stroke-width="9.306317" transform="translate(183.60404,185.12055)scale(1.867800196078432)"/>
   <defs>
     <mask id="letter_m_mask">
-      <rect x="-500" y="-500" width="1000" height="1000" fill="white"/>
+      <rect width="100%" height="100%" fill="white"/>
       <path id="letter_m_hull" transform="translate(183.60404,185.12055)scale(1.867800196078432)" d="M0,0 H11 L14,3 H 17 L20,0 H 29.5 L32.5,3 H 35.5 L38.5,0 H 48 L50,3 42,27 H 45 L5,30 H -7 L2,3 H -1Z" fill="black"/>
     </mask>
   </defs>

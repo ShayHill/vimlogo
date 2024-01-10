@@ -7,9 +7,15 @@
 from vim_logo import vec3
 import vec2_math as vec2
 from basic_colormath import rgb_to_hex
+from vim_logo import params_diamond
 
 VIEWBOX = (0, 0, 293.57495, 293.80619)
 VIEW_CENTER = vec2.vscale(vec2.vadd(VIEWBOX[:2], VIEWBOX[2:]), 0.5)
+
+
+# the white stroke around the entire shape
+FULL_OLINE_COLOR = "#ff0000"
+FULL_OLINE_WIDTH = params_diamond.STROKE_WIDTH
 
 # the fat black outlines around the V and diamond
 FAT_STROKE_COLOR = "#000000"
