@@ -18,6 +18,8 @@ import svg_ultralight as su
 
 from vim_logo.glyphs import new_data_string
 from vim_logo import shared
+from vim_logo.reference_paths import ref_view_center
+from vim_logo.reference_paths import ref_m
 
 import vec2_math as vec2
 
@@ -48,11 +50,11 @@ _H_LINES = [
     30,  # baseline
 ]
 
+
 # ===============================================================================
 #   Path transformations
 # ===============================================================================
 
-from vim_logo.reference_paths import ref_m
 
 _REF_M_TL = ref_m[0]
 _REF_M_R = 276.99076
@@ -61,6 +63,7 @@ _REF_M_B = 179.43305
 _REF_M_W = ref_m[1][0] - ref_m[-1][0]
 _REF_M_H = ref_m[13][1] - ref_m[0][1]
 _SCALE_M = _REF_M_W / 51
+
 
 # _MODEL_HEIGHT = 30
 # _MODEL_M_WIDTH = 51
@@ -75,6 +78,10 @@ max_y = max(y for x, y in ref_m)
 _SCALE_M = (max_x - min_x) / 51
 ddd = (max_y - min_y) / 30
 
+_old_cam_to_m_tl = vec2.vsub(_REF_M_TL, ref_view_center)
+_new_m_tl = vec2.vadd(shared.VIEW_CENTER, _old_cam_to_m_tl)
+
+M_TRANS = f"translate({_new_m_tl[0]},{_new_m_tl[1]})scale({_SCALE_M})"
 
 
 TX = 17 * 7.6
@@ -235,7 +242,6 @@ _letter_i_pts_dot = _relx_to_absx(_letter_i_pts_dot)
 # _letter_i_pts_dot = [(x + TX, y + TY) for x, y in _letter_i_pts_dot]
 # _letter_i_pts_stem = [(x + TX, y + TY) for x, y in _letter_i_pts_stem]
 
-M_TRANS = f"translate({_REF_M_TL[0]},{_REF_M_TL[1]})scale({_SCALE_M})"
 
 def _new_letter_m_mask() -> EtreeElement:
     """Create a `path` element of the letter m mask.

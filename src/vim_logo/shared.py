@@ -8,6 +8,9 @@ from vim_logo import vec3
 import vec2_math as vec2
 from basic_colormath import rgb_to_hex
 
+VIEWBOX = (0, 0, 293.57495, 293.80619)
+VIEW_CENTER = vec2.vscale(vec2.vadd(VIEWBOX[:2], VIEWBOX[2:]), 0.5)
+
 # the fat black outlines around the V and diamond
 FAT_STROKE_COLOR = "#000000"
 FAT_STROKE_WIDTH = 11.5

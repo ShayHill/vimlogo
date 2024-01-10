@@ -11,6 +11,7 @@ import copy
 from vim_logo.paths import REFERENCE_IMAGE_PATH
 from vim_logo.letters_im import letter_m, letter_i, letter_m_mask
 from  vim_logo.letter_v import letter_v
+from vim_logo.shared import VIEWBOX as VIEWBOX
 from vim_logo.diamond import diamond
 import svg_ultralight as su
 
@@ -49,23 +50,25 @@ transform = "scale({})".format(
     *(su.format_number(x) for x in (1, tx, ty))
 )
 
+
 def test_reference():
     reference_svg = etree.parse(REFERENCE_IMAGE_PATH)
     # root =  reference_svg.getroot()
     # defs = root[0]
-    root = su.new_svg_root(x_=0, y_=0, width_=293.57495, height_=293.80619, print_width_=293.57495)
+    # root = su.new_svg_root(x_=0, y_=0, width_=293.57495, height_=293.80619, print_width_=293.57495)
+    root = su.new_svg_root(x_=VIEWBOX[0], y_=VIEWBOX[1], width_=VIEWBOX[2], height_=VIEWBOX[3], print_width_=VIEWBOX[2])
     defs = su.new_sub_element(root, "defs")
     # _ = su.update_element(letter_m_mask, transform=transform_4)
-    mask = su.new_sub_element(defs, "mask", id="letter_m_mask_mask")
+    mask = su.new_sub_element(defs, "mask", id="letter_m_mask")
     _ = su.new_sub_element(mask, "rect", x=-500, y=-500, width=1000, height=1000, fill="white")
     _ = su.update_element(letter_m_mask, fill="black")
     mask.append(letter_m_mask)
 
     for element in [diamond]:
         transform_g = su.new_sub_element(root, 'g')
-        _ = su.update_element(transform_g, mask="url(#letter_m_mask_mask)")
+        _ = su.update_element(transform_g, mask="url(#letter_m_mask)")
         elem = copy.deepcopy(element)
-        _ = su.update_element(elem, transform=transform_3)
+        # _ = su.update_element(elem, transform=transform_3)
         transform_g.append(elem)
         # root.append(elem)
 

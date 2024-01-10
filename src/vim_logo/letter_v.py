@@ -78,7 +78,7 @@ from offset_poly.offset import PolyType
 
 from vim_logo import shared
 from vim_logo.glyphs import new_data_string
-from vim_logo.reference_paths import ref_v, get_footprint, get_dims, ref_v_oline, ref_v_bevels
+from vim_logo.reference_paths import ref_v, get_footprint, get_dims, ref_v_oline, ref_v_bevels, ref_view_center
 
 
 if TYPE_CHECKING:
@@ -247,12 +247,13 @@ def _bevel_and_refine_letter_v_outline(
     return inner, outer
 
 
-inner, outer = _bevel_and_refine_letter_v_outline(_get_letter_v_rough_outline())
+v_inner, v_outer = _bevel_and_refine_letter_v_outline(_get_letter_v_rough_outline())
 
+_REF_V_TL = (ref_v[0][0], ref_v[1][1])
 
-# TODO: move this transform to a main svg building function
-inner = [vec2.vadd(pt, (36, 29)) for pt in inner]
-outer = [vec2.vadd(pt, (36, 29)) for pt in outer]
+_old_cam_to_v_tl = vec2.vsub(_REF_V_TL, ref_view_center)
+_new_v_tl = vec2.vadd(shared.VIEW_CENTER, _old_cam_to_v_tl)
+_V_TRANS = "translate({} {})".format(*_new_v_tl)
 
 
 def _new_letter_v() -> EtreeElement:
@@ -260,10 +261,10 @@ def _new_letter_v() -> EtreeElement:
 
     :return: `g` svg element.
     """
-    d_outer = new_data_string(outer)
-    d_inner = new_data_string(inner)
+    d_outer = new_data_string(v_outer)
+    d_inner = new_data_string(v_inner)
 
-    letter_v = su.new_element("g", id="letter_v")
+    letter_v = su.new_element("g", id="letter_v", transform=_V_TRANS)
 
     def add_path(id_: str, d: str, **attributes: str | float):
         """Add a new subelement path to letter_v."""
@@ -280,10 +281,10 @@ def _new_letter_v() -> EtreeElement:
 
     # begin dim bevels
     dim_bevels = [
-        [*outer[3:8], *inner[2:8][::-1]],
-        [*outer[9:11], *inner[9:12][::-1]],
-        [*outer[15:19], *inner[14:21][::-1]],
-        [*outer[20:22], *inner[20:23][::-1]],
+        [*v_outer[3:8], *v_inner[2:8][::-1]],
+        [*v_outer[9:11], *v_inner[9:12][::-1]],
+        [*v_outer[15:19], *v_inner[14:21][::-1]],
+        [*v_outer[20:22], *v_inner[20:23][::-1]],
     ]
     dim_bevel_style = {"fill": shared.GRAY_DIM, **shared.PIN_STROKE}
     for i, d_bevel in enumerate(new_data_string(x) for x in dim_bevels):

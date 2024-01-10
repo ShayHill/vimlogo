@@ -67,6 +67,8 @@ _ID = sum(get_dims(ref_diamond_inner)) / 2
 _SD = sum(get_dims(ref_diamond_oline)) / 2
 _STROKE_WIDTH = (_SD - _OD) / pow(2, 1 / 2)
 
+_DIAMOND_TRANS = "translate({} {})".format(*shared.VIEW_CENTER)
+
 
 def _get_bevel_surface_normal(
     pnt_a2: tuple[float, float], pnt_b2: tuple[float, float], slope: float
@@ -112,7 +114,7 @@ def _new_diamond() -> EtreeElement:
     bevels: list[list[Vec2]] = []
     for i in range(4):
         bevels.append([inner[i], inner[(i + 1) % 4], outer[(i + 1) % 4], outer[i]])
-    diamond = su.new_element("g")
+    diamond = su.new_element("g", id_="diamond", transform=_DIAMOND_TRANS)
     _ = su.new_sub_element(
         diamond,
         "path",

@@ -2,6 +2,7 @@ from paragraphs import par
 from vim_logo.paths import REFERENCE_IMAGE_PATH
 from lxml import etree
 from lxml.etree import _Element as EtreeElement  # type: ignore
+import vec2_math as vec2
 
 
 reference_svg = etree.parse(REFERENCE_IMAGE_PATH)
@@ -80,6 +81,8 @@ def get_dims(pts: list[tuple[float, float]]) -> tuple[float, float]:
 def _get_pts(nickname: str):
     return _get_pts_from_datastring(_nickname2elem[nickname].attrib["d"])
 
+ref_viewbox = tuple(float(x) for x in reference_root.attrib["viewBox"].split())
+ref_view_center = vec2.vscale(vec2.vadd(ref_viewbox[:2], ref_viewbox[2:]), 0.5)
 
 ref_v = _get_pts("v")
 ref_m = _get_pts("m")
