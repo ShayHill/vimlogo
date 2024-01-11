@@ -11,7 +11,7 @@ import svg_ultralight as su
 
 from vim_logo.diamond import diamond
 from vim_logo.letter_v import letter_v
-from vim_logo.letters_im import letter_i, letter_m, letter_m_mask, _SCALE_M
+from vim_logo.letters_im import elem_im, elem_m_mask, _SCALE_M
 from vim_logo.paths import OUTPUT
 from vim_logo import shared
 
@@ -48,8 +48,8 @@ def _new_background_stroke(elem: EtreeElement) -> EtreeElement:
     transform = elem.attrib["transform"]
     black_stroke_width = float(elem[0].attrib["stroke-width"])
     white_stroke_width = black_stroke_width + shared.FULL_OLINE_WIDTH 
-    if id_ == "letter_m":
-        white_stroke_width = black_stroke_width + shared.FULL_OLINE_WIDTH / _SCALE_M
+    # if id_ == "letter_m":
+    #     white_stroke_width = black_stroke_width + shared.FULL_OLINE_WIDTH / _SCALE_M
 
     # if id_ == "letter_m":
     #     white_stroke_width /= _SCALE_M
@@ -79,8 +79,8 @@ def write_vim_logo(output_path: Path | str = OUTPUT / "vim_logo.svg"):
         print_width_=shared.VIEWBOX[2],
     )
 
-    for element in [diamond, letter_v, letter_m]:
-        root.append(_new_background_stroke(element))
+    # for element in [diamond, letter_v, letter_m]:
+    #     root.append(_new_background_stroke(element))
 
 
     # define the layer mask for the diamond
@@ -89,15 +89,15 @@ def write_vim_logo(output_path: Path | str = OUTPUT / "vim_logo.svg"):
     _ = su.new_sub_element(
         mask, "rect", width="100%", height="100%", fill="white"
     )
-    _ = su.update_element(letter_m_mask, fill="black")
-    mask.append(copy.deepcopy(letter_m_mask))
+    _ = su.update_element(elem_m_mask, fill="black")
+    mask.append(copy.deepcopy(elem_m_mask))
 
     root.append(_mask_m(diamond))
 
     # mask_g = su.new_sub_element(root, "g", mask="url(#letter_m_mask)")
     # mask_g.append(copy.deepcopy(diamond))
 
-    for element in [letter_v, letter_i, letter_m]:
+    for element in [letter_v, elem_im]:
         root.append(copy.deepcopy(element))
 
     _ = su.write_svg(output_path, root)

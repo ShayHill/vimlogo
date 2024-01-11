@@ -39,4 +39,4 @@ ID = sum(get_dims(ref_diamond_inner)) / 2
 # reference image, the fat, black stroke around the diamond is a black polygon
 # itself, not a stroke of a polygon.
 _SD = sum(get_dims(ref_diamond_oline)) / 2
-STROKE_WIDTH = (_SD - OD) / pow(2, 1 / 2)
+STROKE_WIDTH = (_SD - OD) / pow(2, 1 / 2) / 2

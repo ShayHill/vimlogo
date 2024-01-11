@@ -15,7 +15,7 @@ from offset_poly import offset_polygon
 from vim_logo import params_diamond as params
 
 from vim_logo import shared, vec3
-from vim_logo.glyphs import new_data_string
+from vim_logo.glyphs import new_data_string, gap_polygon
 from vim_logo.illumination import (
     LIGHT_SOURCES,
     LightSource,
@@ -90,6 +90,7 @@ def _new_diamond() -> EtreeElement:
     """Return a diamond element."""
     outer = _get_diamond_points(_OD / 2)
     inner = _get_diamond_points(_ID / 2)
+    oline = gap_polygon(outer, _STROKE_WIDTH)
 
     bevels: list[list[Vec2]] = []
     for i in range(4):
@@ -98,11 +99,9 @@ def _new_diamond() -> EtreeElement:
     _ = su.new_sub_element(
         diamond,
         "path",
-        id_="diamond_thick_outline",
-        d=new_data_string(outer),
-        fill="none",
-        stroke=_STROKE_COLOR,
-        stroke_width=_STROKE_WIDTH,
+        id_="diamond_outline",
+        d=new_data_string(oline),
+        fill=_STROKE_COLOR,
     )
     _ = su.new_sub_element(
         diamond,

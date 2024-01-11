@@ -16,10 +16,11 @@ from typing import TYPE_CHECKING
 
 import svg_ultralight as su
 
-from vim_logo.glyphs import new_data_string
+from vim_logo.glyphs import new_data_string, get_polygon_union, gap_polygon
 from vim_logo import shared
 from vim_logo.reference_paths import ref_view_center
 from vim_logo.reference_paths import ref_m
+from offset_poly import offset_polygon, offset_poly_per_edge
 
 import vec2_math as vec2
 
@@ -254,8 +255,10 @@ def _new_letter_m_mask() -> EtreeElement:
     return su.new_element("path", id="letter_m_hull", transform=M_TRANS, d=data_string)
 
 
-MED_STROKE_WIDTH = (_M_VOID - _BEVEL) * _SCALE_M * 1/3 * 2
+MED_STROKE_WIDTH = (_M_VOID - _BEVEL) * _SCALE_M * 1/3
 M_STROKE_WIDTH = MED_STROKE_WIDTH / _SCALE_M
+
+
 
 
 def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
@@ -266,14 +269,19 @@ def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
     :return: `g` svg element.
     """
     skewed = [[_skew_point(pt) for pt in pts] for pts in ptss]
-    data_string = " ".join([new_data_string(pts) for pts in skewed])
-    group = su.new_element("g", id_=f"letter_{name}", transform=M_TRANS)
-    outline = su.new_sub_element(group, "path", id_=f"{name}_outline", d=data_string)
-    _ = su.update_element(outline, stroke=shared.MID_STROKE_COLOR, stroke_width=M_STROKE_WIDTH)
+    data_string = new_data_string(*skewed)
+    group = su.new_element("g", id_=f"letters_{name}", transform=M_TRANS)
+
+    gapped = [gap_polygon(pts, M_STROKE_WIDTH) for pts in skewed]
+    gapped_paths = get_polygon_union(*gapped)
+    # breakpoint()
+    # gapped = sum([gap_polygon_with_validation(p, M_STROKE_WIDTH) for p in skewed], start=[])
+    gapped_data_string = new_data_string(*gapped_paths)
+
+    outline = su.new_sub_element(group, "path", id_=f"{name}_outline", d=gapped_data_string, fill=shared.MID_STROKE_COLOR)
     _ = su.new_sub_element(group, "path", id_=f"{name}_face", d=data_string, fill=shared.VIM_GRAY)
     return group
 
 
-letter_m_mask = _new_letter_m_mask()
-letter_m = _new_letter("m", _letter_m_pts)
-letter_i = _new_letter("i", _letter_i_pts_stem, _letter_i_pts_dot)
+elem_m_mask = _new_letter_m_mask()
+elem_im = _new_letter("im", _letter_m_pts, _letter_i_pts_stem, _letter_i_pts_dot)

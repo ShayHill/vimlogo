@@ -77,7 +77,7 @@ from offset_poly import offset_polygon, offset_poly_per_edge
 from offset_poly.offset import PolyType
 
 from vim_logo import shared
-from vim_logo.glyphs import new_data_string
+from vim_logo.glyphs import new_data_string, gap_polygon
 from vim_logo.reference_paths import ref_v, get_footprint, get_dims, ref_v_oline, ref_v_bevels, ref_view_center
 
 
@@ -113,9 +113,7 @@ Z_BEVEL_FAT = Z_BEVEL + XY_BEVEL
 # reference width and height of the face of the letter V
 V_WIDTH, V_HEIGHT = get_dims(ref_v)
 
-# the strokes are half underneath the bevels, so using both sides of the outline
-# footprint will give the corrent 2x stroke width.
-_V_STROKE_WIDTH = get_dims(ref_v_oline)[0] - get_dims(ref_v_bevels)[0]
+_V_STROKE_WIDTH = (get_dims(ref_v_oline)[0] - get_dims(ref_v_bevels)[0]) / 2
 
 _left_serif = ref_v[-3:] + ref_v[:7]
 _right_serif = ref_v[9:17]
@@ -248,6 +246,7 @@ def _bevel_and_refine_letter_v_outline(
 
 
 v_inner, v_outer = _bevel_and_refine_letter_v_outline(_get_letter_v_rough_outline())
+v_oline = gap_polygon(v_outer, _V_STROKE_WIDTH)
 
 _REF_V_TL = (ref_v[0][0], ref_v[1][1])
 
@@ -263,6 +262,7 @@ def _new_letter_v() -> EtreeElement:
     """
     d_outer = new_data_string(v_outer)
     d_inner = new_data_string(v_inner)
+    d_oline = new_data_string(v_oline)
 
     letter_v = su.new_element("g", id="letter_v", transform=_V_TRANS)
 
@@ -272,10 +272,8 @@ def _new_letter_v() -> EtreeElement:
 
     add_path(
         id_="v_outline",
-        d=d_outer,
-        fill="none",
-        stroke=shared.FAT_STROKE_COLOR,
-        stroke_width=_V_STROKE_WIDTH
+        d=d_oline,
+        fill=shared.FAT_STROKE_COLOR
     )
     add_path(id_="v_lit_bevels", d=d_outer, fill=shared.GRAY_LIT, **shared.PIN_STROKE)
 
