@@ -107,9 +107,16 @@ def _skew_point(pt: tuple[float, float]) -> tuple[float, float]:
     """Skew move x coordinate -1 pt for each 3 y pts."""
     x, y = pt
     skewed = x - y / 3, y
+    skewed = vec2.vscale(skewed, _SCALE_M)
+    skewed = vec2.vadd(skewed, _new_m_tl)
     # skewed = vec2.vscale(skewed, _SCALE_M)
     # skewed = vec2.vadd(skewed, _REF_M_TL)
     return skewed
+
+
+def _skew_points(pts: list[tuple[float, float]]) -> list[tuple[float, float]]:
+    """Skew move x coordinate -1 pt for each 3 y pts."""
+    return [_skew_point(pt) for pt in pts]
 
 
 # ===============================================================================
@@ -157,7 +164,7 @@ _bottom_leg = [
 #   Letter m full path
 # ===============================================================================
 
-_letter_m_pts = [
+letter_m_pts = [
     # topmost, leftmost point on top serif
     (0, _H_LINES[2]),
     (PUSH, _H_LINES[2]),
@@ -182,9 +189,9 @@ _letter_m_pts = [
 # ccc = sum(x[0] for x in _curved_top[:2])
 # breakpoint()
 
-_letter_m_pts = _relx_to_absx(_letter_m_pts)
+letter_m_pts = _relx_to_absx(letter_m_pts)
 
-_letter_m_mask_pts = [*_letter_m_pts[:14], *_letter_m_pts[26:]]
+letter_m_mask_pts = [*letter_m_pts[:15], *letter_m_pts[26:]]
 
 
 # ===============================================================================
@@ -197,7 +204,7 @@ def _get_starting_point_of_letter_i() -> tuple[float, float]:
 
     Treat the i as if it were another vertical bar on the letter m.
     """
-    path = [_letter_m_pts[-6], *_bottom_leg]
+    path = [letter_m_pts[-6], *_bottom_leg]
     return _relx_to_absx(path)[-1]
 
 
@@ -250,16 +257,19 @@ def _new_letter_m_mask() -> EtreeElement:
     :param ptss: list of lists of (x, y) points in a linear spline.
     :return: `g` svg element.
     """
-    skewed = [[_skew_point(pt) for pt in _letter_m_mask_pts]]
+    skewed = [[_skew_point(pt) for pt in letter_m_mask_pts]]
     data_string = " ".join([new_data_string(pts) for pts in skewed])
-    return su.new_element("path", id="letter_m_hull", transform=M_TRANS, d=data_string)
+    return su.new_element("path", id="letter_m_hull", d=data_string)
 
 
-MED_STROKE_WIDTH = (_M_VOID - _BEVEL) * _SCALE_M * 1/3
-M_STROKE_WIDTH = MED_STROKE_WIDTH / _SCALE_M
+MED_STROKE_WIDTH = (_M_VOID - _BEVEL) * 1/3 * _SCALE_M
+IM_STROKE_WIDTH = MED_STROKE_WIDTH
 
 
-
+letter_m_pts = _skew_points(letter_m_pts)
+letter_m_pts_mask = _skew_points(letter_m_mask_pts)
+_letter_i_pts_dot = _skew_points(_letter_i_pts_dot)
+_letter_i_pts_stem = _skew_points(_letter_i_pts_stem)
 
 def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
     """Create a `g` svg element for a small letter.
@@ -268,11 +278,12 @@ def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
     :param ptss: list of lists of (x, y) points in a linear spline.
     :return: `g` svg element.
     """
-    skewed = [[_skew_point(pt) for pt in pts] for pts in ptss]
+    # skewed = [[_skew_point(pt) for pt in pts] for pts in ptss]
+    skewed = ptss
     data_string = new_data_string(*skewed)
-    group = su.new_element("g", id_=f"letters_{name}", transform=M_TRANS)
+    group = su.new_element("g", id_=f"letters_{name}")
 
-    gapped = [gap_polygon(pts, M_STROKE_WIDTH) for pts in skewed]
+    gapped = [gap_polygon(pts, IM_STROKE_WIDTH) for pts in skewed]
     gapped_paths = get_polygon_union(*gapped)
     # breakpoint()
     # gapped = sum([gap_polygon_with_validation(p, M_STROKE_WIDTH) for p in skewed], start=[])
@@ -284,4 +295,4 @@ def _new_letter(name: str, *ptss: list[tuple[float, float]]) -> EtreeElement:
 
 
 elem_m_mask = _new_letter_m_mask()
-elem_im = _new_letter("im", _letter_m_pts, _letter_i_pts_stem, _letter_i_pts_dot)
+elem_im = _new_letter("im", letter_m_pts, _letter_i_pts_stem, _letter_i_pts_dot)

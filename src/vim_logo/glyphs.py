@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable, Sequence, TypeVar
+from typing import Any, Callable, Sequence, TypeVar 
 import shapely
 from shapely.validation import make_valid
 from shapely.ops import unary_union
@@ -150,14 +150,23 @@ def new_data_string(*pts_lists: list[tuple[float, float]]) -> str:
 #     return
 
 
-def get_polygon_union(*pnt_lists: list[tuple[float, float]]) -> list[list[tuple[float, float]]]:
+def get_polygon_union(*pnt_lists: list[tuple[float, float]], negative=None) -> list[list[tuple[float, float]]]:
     """Get the union of a list of polygons.
 
     :param pnt_lists: list of lists of (x, y) points in a linear spline.
     :return: union of the polygons.
     """
-    polygons = [Polygon(pts) for pts in pnt_lists]
-    union = unary_union([make_valid(p) for p in polygons])
+    negative = negative or set()
+    union = unary_union([])
+    for i, pts in enumerate(pnt_lists):
+        if i in negative:
+            union = union - make_valid(Polygon(pts))
+        else:
+            union = unary_union([union, make_valid(Polygon(pts))])
+    # polygons = [Polygon(pts) for pts in pnt_lists]
+    # union = unary_union([make_valid(p) for p in polygons])
+    # if negative is not None:
+    #     union = union - Polygon(negative)
     if union.type == "Polygon":
         return _get_poly_coords(union)
     polygons = [g for g in union.geoms if g.type == "Polygon"]

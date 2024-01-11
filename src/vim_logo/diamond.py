@@ -13,9 +13,10 @@ import vec2_math as vec2
 from basic_colormath import hex_to_rgb, hsl_to_rgb, rgb_to_hex, rgb_to_hsl
 from offset_poly import offset_polygon
 from vim_logo import params_diamond as params
+from vim_logo.letters_im import letter_m_pts_mask
 
 from vim_logo import shared, vec3
-from vim_logo.glyphs import new_data_string, gap_polygon
+from vim_logo.glyphs import new_data_string, gap_polygon, get_polygon_union
 from vim_logo.illumination import (
     LIGHT_SOURCES,
     LightSource,
@@ -83,40 +84,50 @@ def _get_diamond_points(rad: float) -> list[tuple[float, float]]:
 
     This is clockwise in a right-handed coordinate system, which looks unintuitive.
     """
-    return [(rad, 0), (0, rad), (-rad, 0), (0, -rad)]
+    at_origin = [(rad, 0), (0, rad), (-rad, 0), (0, -rad)]
+    return [vec2.vadd(pnt, shared.VIEW_CENTER) for pnt in at_origin]
+
+
+diamond_outer = _get_diamond_points(_OD / 2)
 
 
 def _new_diamond() -> EtreeElement:
     """Return a diamond element."""
-    outer = _get_diamond_points(_OD / 2)
+    outer = diamond_outer
     inner = _get_diamond_points(_ID / 2)
     oline = gap_polygon(outer, _STROKE_WIDTH)
+    oline_paths = get_polygon_union(oline, letter_m_pts_mask, negative={1})
+    oline_d = new_data_string(*oline_paths)
+
+    inner_paths = get_polygon_union(inner, letter_m_pts_mask, negative={1})
+    inner_d = new_data_string(*inner_paths)
 
     bevels: list[list[Vec2]] = []
     for i in range(4):
         bevels.append([inner[i], inner[(i + 1) % 4], outer[(i + 1) % 4], outer[i]])
-    diamond = su.new_element("g", id_="diamond", transform=_DIAMOND_TRANS)
+    diamond = su.new_element("g", id_="diamond")
     _ = su.new_sub_element(
         diamond,
         "path",
         id_="diamond_outline",
-        d=new_data_string(oline),
+        d=oline_d,
         fill=_STROKE_COLOR,
     )
     _ = su.new_sub_element(
         diamond,
         "path",
         id_="diamond_face",
-        d=new_data_string(inner),
+        d=inner_d,
         fill=shared.VIM_GREEN
     )
     for i, bevel in enumerate(bevels):
+        paths = get_polygon_union(bevel, letter_m_pts_mask, negative={1})
         normal = _get_bevel_surface_normal(bevel[0], bevel[1], _BEVEL_SLOPE)
         _ = su.new_sub_element(
             diamond,
             "path",
             id_=f"diamond_bevel_{i}",
-            d=new_data_string(bevel),
+            d=new_data_string(*paths),
             fill=illuminate(normal, diamond_material, *LIGHT_SOURCES),
             **shared.PIN_STROKE,
         )
