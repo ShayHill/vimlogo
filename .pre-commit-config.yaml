@@ -126,6 +126,8 @@ repos:
   # PERF401 Use a list comprehension to create a transformed list
   # PGH003 Use specific rule codes when ignoring type issues
   # PLR0913 Too many arguments to function call
+  #
+  # S320 Using `lxml` to parse untrusted data is known to be ... XML attacks
   rev: 'v0.1.9'
   hooks:
     - id: ruff
@@ -133,7 +135,7 @@ repos:
       args:
       - --target-version=py311
       - --select=ALL
-      - --ignore=ANN101,ANN102,ANN201,ANN202,B905,COM812,D203,D213,D400,I001,ISC003,N802,N806,PERF401,PGH003,PLR0913
+      - --ignore=ANN101,ANN102,ANN201,ANN202,B905,COM812,D203,D213,D400,I001,ISC003,N802,N806,PERF401,PGH003,PLR0913,S320
       # - --fix
 
 # reads pyproject.toml for additional config

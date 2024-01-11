@@ -1,25 +1,42 @@
-from paragraphs import par
-from vim_logo.paths import REFERENCE_IMAGE_PATH
+"""Examine the vim.org reference svg to get dimensions.
+
+The values are toward the bottom of the file and all start with `ref_`.
+
+In addition, there is one public function, `get_dims`, which takes a list of points
+and gives a (width, height) tuple.
+
+:author: Shay Hill
+:created: 2024-01-11
+"""
+
+from collections.abc import Iterable
+
+import vec2_math as vec2
 from lxml import etree
 from lxml.etree import _Element as EtreeElement  # type: ignore
-import vec2_math as vec2
-from typing import Iterable
+
+from vim_logo.paths import REFERENCE_IMAGE_PATH
 
 
-reference_svg = etree.parse(REFERENCE_IMAGE_PATH)
-reference_root = reference_svg.getroot()
+def _get_reference_root() -> EtreeElement:
+    """Get the root of the reference svg."""
+    return etree.parse(REFERENCE_IMAGE_PATH).getroot()
+
+
+_reference_root = _get_reference_root()
 
 
 def _find_elem_by_id(id_: str) -> EtreeElement:
     """Find an element by its id."""
-    elem = reference_root.find(f".//*[@id='{id_}']")
+    elem = _reference_root.find(f".//*[@id='{id_}']")
     if elem is None:
         msg = f"Element with id '{id_}' not found."
         raise ValueError(msg)
     return elem
 
 
-_nickname2elem = {
+# Map arbitrarily selected names to hand-selected elements in the reference image.
+_name2elem = {
     "background": _find_elem_by_id("path493"),
     "diamond_bevel_ne": _find_elem_by_id("path18"),
     "diamond_bevel_nw": _find_elem_by_id("path14"),
@@ -42,11 +59,18 @@ _nickname2elem = {
 }
 
 
-def _get_elem_attrib(nickname: str, attrib: str) -> str:
+def _get_elem_attrib(name: str, attrib: str) -> str:
     """Get an attribute from an element.
 
+    :param name: the nickname of the element
+    :param attrib: the attribute to retrieve
+    :return: the value of the attribute
+
+    Check in the element's attrib dictionary first. If the attribute is not found,
+    check for a `style` key in `elem.attrib` and try to infer the attribute from the
+    style string.
     """
-    elem = _nickname2elem[nickname]
+    elem = _name2elem[name]
     if attrib in elem.attrib:
         return elem.attrib[attrib]
     if "style" in elem.attrib:
@@ -92,28 +116,28 @@ def _get_bounds(
     return (min_x, min_y), (max_x, max_y)
 
 
-def _get_pts(nickname: str) -> list[tuple[float, float]]:
-    return _get_pts_from_datastring(_nickname2elem[nickname].attrib["d"])
+def _get_pts(name: str) -> list[tuple[float, float]]:
+    """Get points from an element as a list of xy tuples.
+
+    :param name: the nickname of the element
+    :return: a list of xy tuples
+    """
+    return _get_pts_from_datastring(_name2elem[name].attrib["d"])
 
 
-def _get_pts_multi(nickname_startswith: str) -> list[tuple[float, float]]:
+def _get_pts_multi(name_startswith: str) -> list[tuple[float, float]]:
     """Return points from several elements in one list.
 
-    :param nickname_startswith: gather all points with
-        k.startswith(nickname_startswith)
-    :returns: a list of all points for which the key starts with nickname_startswith
+    :param name_startswith: gather all points with
+        k.startswith(name_startswith)
+    :returns: a list of all points for which the key starts with name_startswith
 
     The points will not contain any information about where one path ends and the
     next begins. The points will only be good for inferring dimensions.
     """
     result: list[tuple[float, float]] = []
     return sum(
-        (
-            _get_pts(k)
-            for k in _nickname2elem.keys()
-            if k.startswith(nickname_startswith)
-        ),
-        start=result,
+        (_get_pts(k) for k in _name2elem if k.startswith(name_startswith)), start=result
     )
 
 
@@ -123,8 +147,7 @@ def get_dims(pts: Iterable[tuple[float, float]]) -> tuple[float, float]:
     return max_x - min_x, max_y - min_y
 
 
-
-ref_viewbox = tuple(float(x) for x in reference_root.attrib["viewBox"].split())
+ref_viewbox = tuple(float(x) for x in _reference_root.attrib["viewBox"].split())
 ref_view_center = vec2.vscale(vec2.vadd(ref_viewbox[:2], ref_viewbox[2:]), 0.5)
 
 # start from first lexigraphically sorted point
@@ -143,5 +166,7 @@ ref_diamond_inner = _get_pts("diamond_face")
 ref_diamond_outer = _get_pts_multi("diamond_bevel")
 ref_diamond_oline = _get_pts("diamond_outline")
 
+# Other elements use a polygon for the surrounding wide stroke. The background is a
+# polygon around the elements *with* a wide stroke-width.
 ref_background = _get_pts("background")
 ref_background_stroke_width = float(_get_elem_attrib("background", "stroke-width"))
