@@ -6,16 +6,20 @@
 #
 basic-colormath==0.1.0
     # via vim_logo (pyproject.toml)
-lxml==5.0.0
+lxml==5.1.0
     # via
     #   svg-ultralight
     #   vim_logo (pyproject.toml)
+numpy==1.26.3
+    # via shapely
 offset-poly==0.3.2
     # via vim_logo (pyproject.toml)
 paragraphs==0.2.0
     # via svg-ultralight
 pillow==10.2.0
     # via svg-ultralight
+shapely==2.0.2
+    # via vim_logo (pyproject.toml)
 svg-ultralight==0.22.0
     # via vim_logo (pyproject.toml)
 vec2-math==0.4.1

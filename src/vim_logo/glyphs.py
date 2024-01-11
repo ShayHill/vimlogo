@@ -7,6 +7,9 @@
 from __future__ import annotations
 
 from typing import Any, Callable, Sequence, TypeVar
+import shapely
+from shapely.validation import make_valid
+from shapely.geometry import Polygon
 
 import svg_ultralight as su
 
@@ -30,6 +33,27 @@ def _remove_identical_adjacent_values(
     if keep_ixs:
         return [values[i] for i in keep_ixs]
     return [values[0]]
+
+
+def _get_poly_coords(polygon: Polygon) -> list[tuple[float, float]]:
+    """Get the coordinates of a polygon as a list of tuples."""
+    return [(x, y) for x, y in polygon.exterior.coords._coords]
+
+
+def make_valid_polygons(
+    pts: list[tuple[float, float]]
+) -> list[list[tuple[float, float]]]:
+    """Make a polygon valid by removing self intersections.
+
+    :param pts: list of (x, y) points in a linear spline.
+    :return: list of lists of (x, y) points in a linear spline. Validating a polygon
+        can produce more than one polygon if you have bowties or holes.
+    """
+    polygon = shapely.geometry.Polygon(pts)
+    if polygon.is_valid:
+        return _get_poly_coords(polygon)
+    valid_polygons = make_valid(polygon).geoms
+    return [_get_poly_coords(p) for p in list(valid_polygons)[:-1]]
 
 
 def new_data_string(pts: list[tuple[float, float]]) -> str:
