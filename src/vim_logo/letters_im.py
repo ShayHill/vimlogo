@@ -18,8 +18,8 @@ import svg_ultralight as su
 
 from vim_logo.glyphs import new_data_string, get_polygon_union, gap_polygon
 from vim_logo import shared
-from vim_logo.reference_paths import ref_view_center
-from vim_logo.reference_paths import ref_m
+from vim_logo.reference_paths import ref_view_center, ref_m_oline
+from vim_logo.reference_paths import ref_m, get_dims
 from offset_poly import offset_polygon, offset_poly_per_edge
 
 import vec2_math as vec2
@@ -264,6 +264,9 @@ def _new_letter_m_mask() -> EtreeElement:
 
 MED_STROKE_WIDTH = (_M_VOID - _BEVEL) * 1/3 * _SCALE_M
 IM_STROKE_WIDTH = MED_STROKE_WIDTH
+
+IM_STROKE_WIDTH = (get_dims(ref_m_oline)[1] - get_dims(ref_m)[1]) / 2
+
 
 
 letter_m_pts = _skew_points(letter_m_pts)

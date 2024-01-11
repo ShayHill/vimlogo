@@ -28,6 +28,7 @@ _nickname2elem = {
     "diamond_face": _find_elem_by_id("path22"),
     "diamond_outline": _find_elem_by_id("path2"),
     "m_face": _find_elem_by_id("path74"),
+    "m_outline": _find_elem_by_id("path70"),
     "v_face": _find_elem_by_id("path62"),
     "v_bevel_dim_0": _find_elem_by_id("path42"),
     "v_bevel_dim_1": _find_elem_by_id("path46"),
@@ -129,6 +130,7 @@ ref_view_center = vec2.vscale(vec2.vadd(ref_viewbox[:2], ref_viewbox[2:]), 0.5)
 # start from first lexigraphically sorted point
 ref_m = _get_pts("m_face")
 ref_m = ref_m[20:] + ref_m[:20]
+ref_m_oline = _get_pts("m_outline")
 
 # start from first lexigraphically sorted point and reverst to make it clockwise
 ref_v = _get_pts("v_face")
