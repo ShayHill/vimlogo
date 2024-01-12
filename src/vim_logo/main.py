@@ -13,12 +13,9 @@ from vim_logo.diamond import diamond, diamond_outer
 from vim_logo.letter_v import elem_v, v_outer, V_STROKE_WIDTH
 from vim_logo.letters_im import (
     elem_im,
-    elem_m_mask,
-    _SCALE_M,
+    _IM_SCALE,
     letter_m_pts_mask,
     letter_m_pts,
-    _letter_i_pts_dot,
-    _letter_i_pts_stem,
     IM_STROKE_WIDTH,
 )
 from vim_logo.paths import OUTPUT

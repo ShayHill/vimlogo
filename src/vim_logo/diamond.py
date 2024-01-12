@@ -25,7 +25,6 @@ from vim_logo.illumination import (
     illuminate,
     set_material_color,
 )
-from vim_logo.letters_im import MED_STROKE_WIDTH
 from vim_logo.reference_paths import (
     get_dims,
     ref_diamond_inner,

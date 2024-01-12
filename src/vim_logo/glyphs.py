@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable, Sequence, TypeVar 
+from typing import Any, Callable, Sequence, TypeVar
 import shapely
 from shapely.validation import make_valid
 from shapely.ops import unary_union
@@ -67,11 +67,14 @@ def _make_valid_polygons_single(
     # return all_polygons
 
 
-def make_valid_polygons(*pts_lists: list[tuple[float, float]]) -> list[list[tuple[float, float]]]:
+def make_valid_polygons(
+    *pts_lists: list[tuple[float, float]]
+) -> list[list[tuple[float, float]]]:
     all_polygons: list[list[tuple[float, float]]] = []
     for pts in pts_lists:
         all_polygons.append(_make_valid_polygons_single(pts))
     return all_polygons
+
 
 def _new_data_string_single(pts: list[tuple[float, float]]) -> str:
     """Create a linear svg data string from a list of points.
@@ -114,6 +117,7 @@ def _new_data_string_single(pts: list[tuple[float, float]]) -> str:
             commands.append(f"L{x2},{y2}")
     return " ".join(commands) + "Z"
 
+
 def new_data_string(*pts_lists: list[tuple[float, float]]) -> str:
     """Create a linear svg data string from a list of points.
 
@@ -135,7 +139,8 @@ def new_data_string(*pts_lists: list[tuple[float, float]]) -> str:
     All the paths in this project are linear and closed, so this function makes that
     assumption.
     """
-    return ' '.join([_new_data_string_single(pts) for pts in pts_lists])
+    return " ".join([_new_data_string_single(pts) for pts in pts_lists])
+
 
 # def gap_polygon_with_validation(pts: list[tuple[float, float]], gap: float) -> Polygon | MultiPolygon | GeometryCollection:
 #     """Gap a polygon then remove self intersections.
@@ -150,7 +155,9 @@ def new_data_string(*pts_lists: list[tuple[float, float]]) -> str:
 #     return
 
 
-def get_polygon_union(*pnt_lists: list[tuple[float, float]], negative=None) -> list[list[tuple[float, float]]]:
+def get_polygon_union(
+    *pnt_lists: list[tuple[float, float]], negative: set[int] | None = None
+) -> list[list[tuple[float, float]]]:
     """Get the union of a list of polygons.
 
     :param pnt_lists: list of lists of (x, y) points in a linear spline.
@@ -173,7 +180,9 @@ def get_polygon_union(*pnt_lists: list[tuple[float, float]], negative=None) -> l
     return sum([_get_poly_coords(p) for p in polygons], [])
 
 
-def gap_polygon(pts: list[tuple[float, float]], gap: float) -> list[list[tuple[float, float]]]:
+def gap_polygon(
+    pts: list[tuple[float, float]], gap: float
+) -> list[tuple[float, float]]:
     """Gap a polygon.
 
     :param pts: list of (x, y) points in a linear spline.
@@ -182,8 +191,3 @@ def gap_polygon(pts: list[tuple[float, float]], gap: float) -> list[list[tuple[f
         produce more than one polygon if you have bowties or holes.
     """
     return [x.xsect for x in offset_polygon(pts, -gap)]
-
-
-
-
-

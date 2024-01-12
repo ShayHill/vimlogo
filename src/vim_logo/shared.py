@@ -48,3 +48,5 @@ VIM_GRAY = "#cccccc"
 GRAY_LIT = "#ffffff"
 GRAY_DIM = "#7f7f7f"
 VIM_GREEN = "#009933"
+
+K_STROKE = "#000000"
