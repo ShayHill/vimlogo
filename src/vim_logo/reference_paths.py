@@ -186,7 +186,8 @@ ref_m_oline = _get_pts("m_outline")
 ref_v = start_from_first_lexigraphically_sorted_point(_get_pts("v_face"))
 ref_v = [ref_v[0], *reversed(ref_v[1:])]
 
-ref_v_oline = _get_pts("v_outline")
+ref_v_oline = start_from_first_lexigraphically_sorted_point(_get_pts("v_outline"))
+ref_v_oline = [ref_v_oline[0], *reversed(ref_v_oline[1:])]
 ref_v_bevels = _get_pts_multi("v_bevel")
 
 ref_diamond_inner = _get_pts("diamond_face")

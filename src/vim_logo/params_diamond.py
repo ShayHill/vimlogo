@@ -12,8 +12,8 @@ from them.
 from vim_logo.reference_paths import (
     get_dims,
     ref_diamond_inner,
-    ref_diamond_outer,
     ref_diamond_oline,
+    ref_diamond_outer,
 )
 
 # ===============================================================================

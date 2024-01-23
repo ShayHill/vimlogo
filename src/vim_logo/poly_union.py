@@ -4,7 +4,10 @@
 :created: 2024-01-10
 """
 
-from typing import Any, TypeVar, Sequence, Callable
+from typing import Any, TypeVar
+
+from collections.abc import Callable, Sequence
+
 import vec2_math as vec2
 
 _T = TypeVar("_T")
@@ -37,6 +40,7 @@ def _get_min_index(values: Sequence[Any]) -> int:
     """
     return min(enumerate(values), key=lambda x: x[1])[0]
 
+
 aaa = vec2.get_segment_intersection(((0, 0), (10, 0)), ((5, 0), (15, 0)))
 aaa = vec2.project_to_segment(((0, 0), (10, 0)), (15, 0))
 bbb = vec2.get_standard_form(((0, 0), (10, 0)))
@@ -63,5 +67,3 @@ breakpoint()
 #     legs = list(zip(polygon, polygon[1:] + polygon[:1]))
 #     for i, leg_a in enumerate(legs):
 #         for leg_b in legs[i+1:]
-
-

@@ -8,26 +8,26 @@ import copy
 from pathlib import Path
 
 import svg_ultralight as su
+from lxml.etree import _Element as EtreeElement  # type: ignore
 
+from vim_logo import (
+    diamond as diamond_module,
+    letter_v as letter_v_module,
+    letters_im as letters_im_module,
+    params_diamond,
+    shared,
+)
 from vim_logo.diamond import diamond, diamond_outer
-from vim_logo.letter_v import elem_v, v_outer, V_STROKE_WIDTH
+from vim_logo.glyphs import gap_polygon, get_polygon_union, new_data_string
+from vim_logo.letter_v import V_STROKE_WIDTH, elem_v, v_outer
 from vim_logo.letters_im import (
-    elem_im,
     _IM_SCALE,
-    letter_m_pts_mask,
-    letter_m_pts,
     IM_STROKE_WIDTH,
+    elem_im,
+    letter_m_pts,
+    letter_m_pts_mask,
 )
 from vim_logo.paths import OUTPUT
-from vim_logo import shared
-from vim_logo import params_diamond
-
-from vim_logo import letter_v as letter_v_module
-from vim_logo import letters_im as letters_im_module
-from vim_logo import diamond as diamond_module
-from vim_logo.glyphs import gap_polygon, get_polygon_union, new_data_string
-
-from lxml.etree import _Element as EtreeElement  # type: ignore
 
 
 def _mask_m(elem: EtreeElement) -> EtreeElement:
@@ -111,7 +111,16 @@ def write_vim_logo(output_path: Path | str = OUTPUT / "vim_logo.svg"):
     # background_paths = get_polygon_union(*background, ltr_m )
     # background_paths = get_polygon_union(ltr_m)
     d_background = new_data_string(*background_paths)
-    root.append(su.new_sub_element(root, "path", d=d_background, fill=shared.FULL_OLINE_COLOR, stroke="#444444", stroke_width=0.05))
+    root.append(
+        su.new_sub_element(
+            root,
+            "path",
+            d=d_background,
+            fill=shared.FULL_OLINE_COLOR,
+            stroke="#444444",
+            stroke_width=0.05,
+        )
+    )
 
     root.append(diamond)
 

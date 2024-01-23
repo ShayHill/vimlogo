@@ -6,16 +6,17 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable, Sequence, TypeVar
+from typing import Any, TypeVar
+
+from collections.abc import Callable, Sequence
+
 import shapely
-from shapely.validation import make_valid
-from shapely.ops import unary_union
-from shapely.geometry import Polygon, MultiPolygon, GeometryCollection
-
 import svg_ultralight as su
-
-from offset_poly import offset_polygon, offset_poly_per_edge
+from offset_poly import offset_poly_per_edge, offset_polygon
 from offset_poly.offset import PolyType
+from shapely.geometry import GeometryCollection, MultiPolygon, Polygon
+from shapely.ops import unary_union
+from shapely.validation import make_valid
 
 _T = TypeVar("_T")
 
@@ -174,9 +175,9 @@ def get_polygon_union(
     # union = unary_union([make_valid(p) for p in polygons])
     # if negative is not None:
     #     union = union - Polygon(negative)
-    if union.type == "Polygon":
+    if union.geom_type == "Polygon":
         return _get_poly_coords(union)
-    polygons = [g for g in union.geoms if g.type == "Polygon"]
+    polygons = [g for g in union.geoms if g.geom_type == "Polygon"]
     return sum([_get_poly_coords(p) for p in polygons], [])
 
 

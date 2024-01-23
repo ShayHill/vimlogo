@@ -4,11 +4,16 @@
 :created: 2024-01-03
 """
 
-from vim_logo import vec3
 import vec2_math as vec2
 from basic_colormath import rgb_to_hex
-from vim_logo import params_diamond
-from vim_logo.reference_paths import ref_background_stroke_width, ref_diamond_oline, ref_background, get_dims
+
+from vim_logo import params_diamond, vec3
+from vim_logo.reference_paths import (
+    get_dims,
+    ref_background,
+    ref_background_stroke_width,
+    ref_diamond_oline,
+)
 
 # the white stroke around the entire shape
 FULL_OLINE_COLOR = "#ffffff"
@@ -16,13 +21,15 @@ FULL_OLINE_COLOR = "#ffffff"
 bg_w = get_dims(ref_background)[0]
 di_w = get_dims(ref_diamond_oline)[0]
 stroke = ref_background_stroke_width
-FULL_OLINE_WIDTH = (bg_w - di_w) / 2 / pow(2, 1/2)  + stroke / 2 
+FULL_OLINE_WIDTH = (bg_w - di_w) / 2 / pow(2, 1 / 2) + stroke / 2
 
 # combined padding for both sides (left + right or top + bottom)
 # TODO: increase padding to 10
 PAD = 0
 _geometry_width = (
-    params_diamond.OD + 2 * params_diamond.STROKE_WIDTH * pow(2, 1/2) + 2 * FULL_OLINE_WIDTH * pow(2, 1/2)
+    params_diamond.OD
+    + 2 * params_diamond.STROKE_WIDTH * pow(2, 1 / 2)
+    + 2 * FULL_OLINE_WIDTH * pow(2, 1 / 2)
 )
 VIEWBOX = (0, 0, _geometry_width + PAD, _geometry_width + PAD)
 VIEW_CENTER = vec2.vscale(vec2.vadd(VIEWBOX[:2], VIEWBOX[2:]), 0.5)

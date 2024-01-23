@@ -341,7 +341,7 @@ for i in range(_light_sources):
     # # LightSource("#ffffff", (-9, -12, 24)),
 # ]
 
-_total_intensity = 5 
+_total_intensity = 5
 _light_sources = 32
 LIGHT_SOURCES: list[LightSource] = []
 intensity = 255 * _total_intensity / _light_sources
@@ -355,7 +355,6 @@ for i in range(_light_sources):
     pnt = vec3.add(contrib_a, contrib_b)
     print(pnt)
     LIGHT_SOURCES.append(LightSource(color, pnt))
-
 
 
 def _push_hsl(
@@ -377,6 +376,7 @@ def _push_hsl(
     sat = max(0, min(100, sat + sat_shift))
     lit = max(0, min(100, lit + lit_shift))
     return rgb_to_hex(hsl_to_rgb((hue, sat, lit)))
+
 
 diamond_material = set_material_color(
     (0, 0, 1),
