@@ -35,7 +35,7 @@ filelock==3.13.1
     # via
     #   tox
     #   virtualenv
-fonttools==4.47.0
+fonttools==4.47.2
     # via matplotlib
 identify==2.5.33
     # via pre-commit
@@ -62,7 +62,7 @@ numpy==1.26.3
     #   contourpy
     #   matplotlib
     #   shapely
-offset-poly==0.3.2
+offset-poly==0.3.3
     # via vim_logo (pyproject.toml)
 packaging==23.2
     # via
@@ -113,7 +113,7 @@ termcolor==2.4.0
     # via commitizen
 tomlkit==0.12.3
     # via commitizen
-tox==4.11.4
+tox==4.12.1
     # via vim_logo (pyproject.toml)
 types-beautifulsoup4==4.12.0.20240106
     # via types-lxml

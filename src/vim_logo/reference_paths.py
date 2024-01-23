@@ -142,7 +142,10 @@ def _get_pts_multi(name_startswith: str) -> list[tuple[float, float]]:
         (_get_pts(k) for k in _name2elem if k.startswith(name_startswith)), start=result
     )
 
-def _start_from_first_lexigraphically_sorted_point(pts: list[tuple[float, float]]) -> list[tuple[float, float]]:
+
+def start_from_first_lexigraphically_sorted_point(
+    pts: list[tuple[float, float]]
+) -> list[tuple[float, float]]:
     """Start the list of points from the first lexigraphically sorted point.
 
     :param pts: a list of points
@@ -168,19 +171,19 @@ def get_dims(pts: Iterable[tuple[float, float]]) -> tuple[float, float]:
 ref_viewbox = tuple(float(x) for x in _reference_root.attrib["viewBox"].split())
 ref_view_center = vec2.vscale(vec2.vadd(ref_viewbox[:2], ref_viewbox[2:]), 0.5)
 
-ref_i_stem = _start_from_first_lexigraphically_sorted_point(_get_pts("i_face_stem"))
+ref_i_stem = start_from_first_lexigraphically_sorted_point(_get_pts("i_face_stem"))
 ref_i_stem = [ref_i_stem[0], *reversed(ref_i_stem[1:])]
 
-ref_i_dot = _start_from_first_lexigraphically_sorted_point(_get_pts("i_face_dot"))
+ref_i_dot = start_from_first_lexigraphically_sorted_point(_get_pts("i_face_dot"))
 ref_i_dot = [ref_i_dot[0], *reversed(ref_i_dot[1:])]
 
 
-ref_m = _start_from_first_lexigraphically_sorted_point(_get_pts("m_face"))
+ref_m = start_from_first_lexigraphically_sorted_point(_get_pts("m_face"))
 ref_m_oline = _get_pts("m_outline")
 
 
 # start from first lexigraphically sorted point and reverst to make it clockwise
-ref_v = _start_from_first_lexigraphically_sorted_point(_get_pts("v_face"))
+ref_v = start_from_first_lexigraphically_sorted_point(_get_pts("v_face"))
 ref_v = [ref_v[0], *reversed(ref_v[1:])]
 
 ref_v_oline = _get_pts("v_outline")
@@ -194,3 +197,18 @@ ref_diamond_oline = _get_pts("diamond_outline")
 # polygon around the elements *with* a wide stroke-width.
 ref_background = _get_pts("background")
 ref_background_stroke_width = float(_get_elem_attrib("background", "stroke-width"))
+
+
+ref_v_dim_bevels = [
+    _get_pts("v_bevel_dim_0"),
+    _get_pts("v_bevel_dim_1"),
+    _get_pts("v_bevel_dim_2"),
+    _get_pts("v_bevel_dim_3"),
+]
+
+ref_v_lit_bevels = [
+    _get_pts("v_bevel_lit_0"),
+    _get_pts("v_bevel_lit_1"),
+    _get_pts("v_bevel_lit_2"),
+    _get_pts("v_bevel_lit_3"),
+]

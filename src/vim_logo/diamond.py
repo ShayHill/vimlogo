@@ -1,53 +1,41 @@
 """The green diamond behind the letters.
 
+Simple diamonds, but the inner diamond and at least one of the bevels will have the
+letter_m_mask removed from them, so the diamond and some bevels will have more than
+four points.
+
+The reference SVG accomplished the same thing with overlaying white polygons, but
+there were a lot of mistakes. This is (arguably, because there's also masking) the
+right way to do it.
+
 :author: Shay Hill
 :created: 2023-12-30
 """
 
 from __future__ import annotations
 
+import functools as ft
 from typing import TYPE_CHECKING
 
 import svg_ultralight as su
 import vec2_math as vec2
-from basic_colormath import hex_to_rgb, hsl_to_rgb, rgb_to_hex, rgb_to_hsl
-from offset_poly import offset_polygon
-from vim_logo import params_diamond as params
-from vim_logo.letters_im import letter_m_pts_mask
 
+from vim_logo import params_diamond as params
 from vim_logo import shared, vec3
-from vim_logo.glyphs import new_data_string, gap_polygon, get_polygon_union
-from vim_logo.illumination import (
-    LIGHT_SOURCES,
-    LightSource,
-    Material,
-    diamond_material,
-    illuminate,
-    set_material_color,
-)
-from vim_logo.reference_paths import (
-    get_dims,
-    ref_diamond_inner,
-    ref_diamond_oline,
-    ref_diamond_outer,
-)
+from vim_logo.glyphs import gap_polygon, get_polygon_union, new_data_string
+from vim_logo.illumination import LIGHT_SOURCES, diamond_material, illuminate
+from vim_logo.letters_im import letter_m_pts_mask
 
 if TYPE_CHECKING:
     from lxml.etree import _Element as EtreeElement  # type: ignore
 
     from vim_logo.vec3 import Vec3
 
-Vec2 = tuple[float, float]
 
-
-
-_STROKE_COLOR = shared.MID_STROKE_COLOR
 _BEVEL_SLOPE = params.BEVEL_SLOPE
 _OD = params.OD
 _ID = params.ID
 _STROKE_WIDTH = params.STROKE_WIDTH
-
-_DIAMOND_TRANS = "translate({} {})".format(*shared.VIEW_CENTER)
 
 
 def _get_bevel_surface_normal(
@@ -75,62 +63,69 @@ def _get_bevel_surface_normal(
     return vec3.normalize(vec3.cross(vec_ac3, vec_ab3))
 
 
-def _get_diamond_points(rad: float) -> list[tuple[float, float]]:
-    """Four points of a diamond centered at the origin, clockwise from +x.
+def _new_diamond_points(rad: float) -> list[tuple[float, float]]:
+    """Four points of a diamond centered at the origin, clockwise from -x.
 
     :param rad: radius of the diamond (distance of each point from the origin)
     :return: [(x1, y1), (x2, y2), (x3, y3), (x4, y4)]
 
     This is clockwise in a right-handed coordinate system, which looks unintuitive.
     """
-    at_origin = [(rad, 0), (0, rad), (-rad, 0), (0, -rad)]
+    at_origin = [(-rad, 0), (0, -rad), (rad, 0), (0, rad)]
     return [vec2.vadd(pnt, shared.VIEW_CENTER) for pnt in at_origin]
 
 
-diamond_outer = _get_diamond_points(_OD / 2)
+# this value is used elsewhere to build the background
+diamond_outer = _new_diamond_points(_OD / 2)
 
 
-def _new_diamond() -> EtreeElement:
-    """Return a diamond element."""
-    outer = diamond_outer
-    inner = _get_diamond_points(_ID / 2)
-    oline = gap_polygon(outer, _STROKE_WIDTH)
-    oline_paths = get_polygon_union(oline, letter_m_pts_mask, negative={1})
-    oline_d = new_data_string(*oline_paths)
+def _subtract_m(pts: list[tuple[float, float]]) -> str:
+    """Subtract the letter_m_mask from a polygon.
 
-    inner_paths = get_polygon_union(inner, letter_m_pts_mask, negative={1})
-    inner_d = new_data_string(*inner_paths)
+    :param pts: xy polygon points
+    :return: path data string with the letter_m_mask subtracted from it
+    """
+    paths = get_polygon_union(pts, letter_m_pts_mask, negative={1})
+    return new_data_string(*paths)
 
-    bevels: list[list[Vec2]] = []
-    for i in range(4):
-        bevels.append([inner[i], inner[(i + 1) % 4], outer[(i + 1) % 4], outer[i]])
+
+def _illuminate_bevel(pts: list[tuple[float, float]]) -> str:
+    """Illuminate a bevel.
+
+    :param pts: xy polygon points
+    :return: hex color of the illuminated bevel
+    """
+    normal = _get_bevel_surface_normal(pts[0], pts[1], _BEVEL_SLOPE)
+    return illuminate(normal, diamond_material, *LIGHT_SOURCES)
+
+
+def _new_elem_diamond() -> EtreeElement:
+    """Create a `g` element for the green diamond.
+
+    :return: `g` element with `path` elements for the diamond outline, diamond face,
+        and diamond bevels
+    """
+    face = _new_diamond_points(_ID / 2)
+    face_d = _subtract_m(face)
+
+    oline_d = _subtract_m(gap_polygon(diamond_outer, _STROKE_WIDTH))
+
     diamond = su.new_element("g", id_="diamond")
-    _ = su.new_sub_element(
-        diamond,
-        "path",
-        id_="diamond_outline",
-        d=oline_d,
-        fill=_STROKE_COLOR,
-    )
-    _ = su.new_sub_element(
-        diamond,
-        "path",
-        id_="diamond_face",
-        d=inner_d,
-        fill=shared.VIM_GREEN
-    )
-    for i, bevel in enumerate(bevels):
-        paths = get_polygon_union(bevel, letter_m_pts_mask, negative={1})
-        normal = _get_bevel_surface_normal(bevel[0], bevel[1], _BEVEL_SLOPE)
-        _ = su.new_sub_element(
-            diamond,
-            "path",
+    add_path = ft.partial(su.new_sub_element, diamond, "path")
+    _ = add_path(id_="diamond_outline", d=oline_d, fill=shared.K_STROKE)
+    _ = add_path(id_="diamond_face", d=face_d, fill=shared.VIM_GREEN)
+
+    for i in range(4):
+        j = (i + 1) % 4
+        bevel = [face[i], face[j], diamond_outer[j], diamond_outer[i]]
+        bevel_d = _subtract_m(bevel)
+        _ = add_path(
             id_=f"diamond_bevel_{i}",
-            d=new_data_string(*paths),
-            fill=illuminate(normal, diamond_material, *LIGHT_SOURCES),
+            d=bevel_d,
+            fill=_illuminate_bevel(bevel),
             **shared.PIN_STROKE,
         )
     return diamond
 
 
-diamond = _new_diamond()
+diamond = _new_elem_diamond()

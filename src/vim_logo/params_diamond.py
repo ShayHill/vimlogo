@@ -1,8 +1,9 @@
 """Parameterization for diamond.py
 
-These are in a separate file so the shared parameter can import them. The viewbox is
-scaled by the diamond OD and the white stroke width around the entire shape is a
-functioin of the diamond STROKE_WIDTH.
+Diamond parameters only are in a separate file so the "shared" module can import
+them. The diamond ID and stroke width are used to calculate the viewbox. The elements
+themselves cannot be examined for max extent because they have the m-mask removed
+from them.
 
 :author: Shay Hill
 :created: 2024-01-10

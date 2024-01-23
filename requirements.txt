@@ -12,7 +12,7 @@ lxml==5.1.0
     #   vim_logo (pyproject.toml)
 numpy==1.26.3
     # via shapely
-offset-poly==0.3.2
+offset-poly==0.3.3
     # via vim_logo (pyproject.toml)
 paragraphs==0.2.0
     # via svg-ultralight
