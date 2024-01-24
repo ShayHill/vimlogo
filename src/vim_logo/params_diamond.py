@@ -1,4 +1,4 @@
-"""Parameterization for diamond.py
+"""Parameterization for diamond.py.
 
 Diamond parameters only are in a separate file so the "shared" module can import
 them. The diamond ID and stroke width are used to calculate the viewbox. The elements

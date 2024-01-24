@@ -5,9 +5,8 @@
 """
 
 import vec2_math as vec2
-from basic_colormath import rgb_to_hex
 
-from vim_logo import params_diamond, vec3
+from vim_logo import params_diamond
 from vim_logo.reference_paths import (
     get_dims,
     ref_background,
@@ -24,8 +23,7 @@ stroke = ref_background_stroke_width
 FULL_OLINE_WIDTH = (bg_w - di_w) / 2 / pow(2, 1 / 2) + stroke / 2
 
 # combined padding for both sides (left + right or top + bottom)
-# TODO: increase padding to 10
-PAD = 0
+PAD = 5
 _geometry_width = (
     params_diamond.OD
     + 2 * params_diamond.STROKE_WIDTH * pow(2, 1 / 2)
@@ -48,7 +46,10 @@ MID_STROKE = {"stroke": MID_STROKE_COLOR, "stroke-width": MID_STROKE_WIDTH}
 # the tiny pinstripes on the bevels of the V and diamond
 PIN_STROKE_COLOR = "#000000"
 PIN_STROKE_WIDTH = 0.216  # copied from reference svg. Consistently used there.
-PIN_STROKE = {"stroke": PIN_STROKE_COLOR, "stroke-width": PIN_STROKE_WIDTH}
+PIN_STROKE: dict[str, str | float] = {
+    "stroke": PIN_STROKE_COLOR,
+    "stroke-width": PIN_STROKE_WIDTH,
+}
 
 # colors for V, im, and diamond
 VIM_GRAY = "#cccccc"
