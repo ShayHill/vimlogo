@@ -4,19 +4,23 @@
 :created: 2023-12-30
 """
 
+# pyright: reportMissingTypeStubs=false
+# pyright: reportUnknownMemberType=false
+# pyright: reportUnknownVariableType=false
+
+
 from __future__ import annotations
 
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
-from collections.abc import Callable, Sequence
-
-import shapely
 import svg_ultralight as su
-from offset_poly import offset_poly_per_edge, offset_polygon
-from offset_poly.offset import PolyType
-from shapely.geometry import GeometryCollection, MultiPolygon, Polygon
+from offset_poly import offset_polygon
+from shapely.geometry import Polygon
 from shapely.ops import unary_union
 from shapely.validation import make_valid
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Sequence
 
 _T = TypeVar("_T")
 
@@ -46,35 +50,6 @@ def _get_poly_coords(polygon: Polygon) -> list[list[tuple[float, float]]]:
     for interior in polygon.interiors:
         rings.append([(x, y) for x, y in interior.coords._coords])
     return rings
-
-
-def _make_valid_polygons_single(
-    pts: list[tuple[float, float]]
-) -> list[list[tuple[float, float]]]:
-    """Make a polygon valid by removing self intersections.
-
-    :param pts: list of (x, y) points in a linear spline.
-    :return: list of lists of (x, y) points in a linear spline. Validating a polygon
-        can produce more than one polygon if you have bowties or holes.
-    """
-    polygon = shapely.geometry.Polygon(pts)
-    if polygon.is_valid:
-        return polygon
-    return make_valid(polygon)
-    # valid_polygons = make_valid(polygon).geoms
-    # all_polygons: list[list[tuple[float, float]]] = []
-    # for valid_polygon in list(valid_polygons)[:-1]:
-    #     all_polygons.append(valid_polygon)
-    # return all_polygons
-
-
-def make_valid_polygons(
-    *pts_lists: list[tuple[float, float]]
-) -> list[list[tuple[float, float]]]:
-    all_polygons: list[list[tuple[float, float]]] = []
-    for pts in pts_lists:
-        all_polygons.append(_make_valid_polygons_single(pts))
-    return all_polygons
 
 
 def _new_data_string_single(pts: list[tuple[float, float]]) -> str:
@@ -143,19 +118,6 @@ def new_data_string(*pts_lists: list[tuple[float, float]]) -> str:
     return " ".join([_new_data_string_single(pts) for pts in pts_lists])
 
 
-# def gap_polygon_with_validation(pts: list[tuple[float, float]], gap: float) -> Polygon | MultiPolygon | GeometryCollection:
-#     """Gap a polygon then remove self intersections.
-#     """
-#     gapped = [x.xsect for x in offset_polygon(pts, -gap)]
-#     polygon = Polygon(gapped)
-#     aaa = make_valid_polygons(polygon)
-#     if aaa.type == "Polygon":
-#         bbb = _get_poly_coords(aaa)
-
-#     breakpoint()
-#     return
-
-
 def get_polygon_union(
     *pnt_lists: list[tuple[float, float]], negative: set[int] | None = None
 ) -> list[list[tuple[float, float]]]:
@@ -165,20 +127,17 @@ def get_polygon_union(
     :return: union of the polygons.
     """
     negative = negative or set()
-    union = unary_union([])
+    union: Any = unary_union([])
     for i, pts in enumerate(pnt_lists):
         if i in negative:
             union = union - make_valid(Polygon(pts))
         else:
             union = unary_union([union, make_valid(Polygon(pts))])
-    # polygons = [Polygon(pts) for pts in pnt_lists]
-    # union = unary_union([make_valid(p) for p in polygons])
-    # if negative is not None:
-    #     union = union - Polygon(negative)
     if union.geom_type == "Polygon":
         return _get_poly_coords(union)
     polygons = [g for g in union.geoms if g.geom_type == "Polygon"]
-    return sum([_get_poly_coords(p) for p in polygons], [])
+    poly_coords_list = [_get_poly_coords(p) for p in polygons]
+    return [x for y in poly_coords_list for x in y]
 
 
 def gap_polygon(

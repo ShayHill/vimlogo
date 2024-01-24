@@ -128,6 +128,10 @@ repos:
   # PLR0913 Too many arguments to function call
   #
   # S320 Using `lxml` to parse untrusted data is known to be ... XML attacks
+  # PLR2004 Magic value used in comparison
+  # C416 Unnecessary `list` comprehension
+  # SLF001 Private member accessed
+  # RUF007 Prefer `itertools.pairwise()` over `zip()`
   rev: 'v0.1.9'
   hooks:
     - id: ruff
@@ -135,7 +139,7 @@ repos:
       args:
       - --target-version=py311
       - --select=ALL
-      - --ignore=ANN101,ANN102,ANN201,ANN202,B905,COM812,D203,D213,D400,I001,ISC003,N802,N806,PERF401,PGH003,PLR0913,S320
+      - --ignore=ANN101,ANN102,ANN201,ANN202,B905,COM812,D203,D213,D400,I001,ISC003,N802,N806,PERF401,PGH003,PLR0913,S320,PLR2004,C416,SLF001,RUF007
       # - --fix
 
 # reads pyproject.toml for additional config
