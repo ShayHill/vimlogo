@@ -12,13 +12,23 @@ The idea is to weigh ambient, diffuse, and specular light sources to get a color
 a planar face. The ambient and specular colors will be the color of the material. The
 specular color will be the color of the light source.
 
+The reference image had some hue shift due to clipping. I wanted to add a little hue
+shift the right way, not by accidentally getting there without clipping. To get a
+create bevels for a shared.VIM_GREEN face, I used a slightly bluer material with
+yellow lights. Where the bevels are in shadow (mostly ambient light), they are more
+blue. Where the bevels are highlighted by bright yellow light, specular illumation
+makes them more yellow. I did not use illumination code for the face. I just used an
+explicit face color.
+
 :author: Shay Hill
 :created: 2023-12-31
 """
 
 import dataclasses
+import math
 from typing import Annotated
 
+import vec2_math as vec2
 from basic_colormath import (
     float_tuple_to_8bit_int_tuple,
     hex_to_rgb,
@@ -26,7 +36,6 @@ from basic_colormath import (
     rgb_to_hex,
     rgb_to_hsl,
 )
-from paragraphs import par
 
 from vim_logo import shared, vec3
 from vim_logo.vec3 import Vec3
@@ -51,7 +60,7 @@ def _intensity_to_rgb(color: Vec3) -> RGB:
     return float_tuple_to_8bit_int_tuple((r, g, b))
 
 
-def _rgb_to_intensity(rgb: RGB) -> Vec3:
+def _rgb_to_intensity(rgb: Vec3) -> Vec3:
     """Convert a color tuple in the int interval [0, 255] to the float interval [0, 1].
 
     :param rgb: a color tuple in the interval [0, 255]
@@ -202,13 +211,6 @@ class Material(_SetsColor):
         self.shine = 1
 
 
-def interp3(vec_a: Vec3, vec_b: Vec3, time: float) -> Vec3:
-    time = min(max(time, 0), 1)
-    contrib_a = vec3.scale(vec_a, 1 - time)
-    contrib_b = vec3.scale(vec_b, time)
-    return vec3.vsum(contrib_a, contrib_b)
-
-
 def uniform_shading_model(
     normal_vector: Vec3, material: Material, light_source: LightSource
 ) -> Vec3:
@@ -276,85 +278,46 @@ def illuminate(
     return _intensity_to_hex(sum_vector)
 
 
-def set_material_color(
-    normal_vector: Vec3, material: Material, *light_sources: LightSource
-) -> Material:
-    """Set the color of the material to create a given color at a specific point.
+# ===============================================================================
+#   light sources for  the diamond bevels
+# ===============================================================================
 
-    :param normal_vector: a normalized vector perpendicular to the face
-    :param material: the material of the face
-    :param light_sources: the light sources
-    :return: None
+LIGHT_LOCATION = (-4, -6, 2)
 
-    Reset the material color so that the output color in these lighting conditions is
-    equal to the input material color. Uses a brute force method.
+# Because of the way I implemented light sources, a light source can only be 255
+# bright, so intensity greater than 255 will require multiple light sources. If you
+# change the light location or some other variable, you may have to adjust the light
+# intensity. An error message will guide you. You will not be able to use fully
+# desaturated colors, because some specular lighting is hard coded in.
+LIGHT_COLOR = (1, 1, 1 / 16)
+LIGHT_INTENSITY = 1000
+LIGHTS = min(360, LIGHT_INTENSITY)
+
+intensity_per_light = LIGHT_INTENSITY / LIGHTS
+
+
+def _get_light_ring() -> list[LightSource]:
+    """Use module-wide values to create a ring of light sources.
+
+    Light sources near the specified LIGHT_LOCATION will be brighter.
     """
-    goal_color = material.rgb_color
+    pnt_x, pnt_y = LIGHT_LOCATION[:2]
+    angles = [2 * math.pi * i / LIGHTS for i in range(LIGHTS)]
+    locs = [vec2.vrotate((pnt_x, pnt_y), x) for x in angles]
+    lits = [math.pi - abs(vec2.get_signed_angle((pnt_x, pnt_y), x)) for x in locs]
+    lits = [pow(x, 3) for x in lits]
+    lits = [x * LIGHT_INTENSITY / sum(lits) for x in lits]
 
-    material.color = (1, 1, 1)
-    test_white = hex_to_rgb(illuminate(normal_vector, material, *light_sources))
-    material.color = (0, 0, 0)
-    test_black = hex_to_rgb(illuminate(normal_vector, material, *light_sources))
-    is_too_dim = any(x < y for x, y in zip(test_white, goal_color))
-    is_too_bright = any(x > y for x, y in zip(test_black, goal_color))
-
-    if is_too_dim or is_too_bright:
-        msg = par(
-            f"""Material and LightSource parameters can only create colors in the
-            range {test_black} to {test_white} at given normal vector. The goal color
-            is {goal_color}"""
-        )
-        raise ValueError(msg)
-
-    candidate: list[int] = [0, 0, 0]
-    while True:
-        material.rgb_color = (candidate[0], candidate[1], candidate[2])
-        attempt = hex_to_rgb(illuminate(normal_vector, material, *light_sources))
-        if all(x >= y for x, y in zip(attempt, goal_color)):
-            break
-        for i in range(3):
-            if attempt[i] < goal_color[i]:
-                candidate[i] += 1
-    return material
+    light_sources: list[LightSource] = []
+    for loc, lit in zip(locs, lits):
+        rgb = (lit * LIGHT_COLOR[0], lit * LIGHT_COLOR[1], lit * LIGHT_COLOR[2])
+        if max(rgb) == 0:
+            continue
+        light_sources.append(LightSource(rgb_to_hex(rgb), (*loc, LIGHT_LOCATION[2])))
+    return light_sources
 
 
-# the light source for V and diamond bevels
-
-_total_intensity = 5
-_light_sources = 32
-
-LIGHT_SOURCES_WHITE: list[LightSource] = []
-intensity = 255 * _total_intensity / _light_sources
-color = rgb_to_hex((intensity, intensity, intensity))
-pnt_a = (-24, -10, 2)
-pnt_b = (5, -24, 2)
-for i in range(_light_sources):
-    time = i / (_light_sources - 1)
-    contrib_a = vec3.scale(pnt_a, 1 - time)
-    contrib_b = vec3.scale(pnt_b, time)
-    pnt = vec3.add(contrib_a, contrib_b)
-    print(pnt)
-    LIGHT_SOURCES_WHITE.append(LightSource(color, pnt))
-
-    # LightSource(color, (-9, -12, 9)),
-    # LightSource("#ffffff", (-9, -12, 9)),
-    # # LightSource("#ffffff", (-9, -12, 24)),
-# ]
-
-_total_intensity = 5
-_light_sources = 32
-LIGHT_SOURCES: list[LightSource] = []
-intensity = 255 * _total_intensity / _light_sources
-color = rgb_to_hex((intensity, intensity, intensity / 16))
-# pnt_a = (-24, 0, 2)
-# pnt_b = (15, -24, 2)
-for i in range(_light_sources):
-    time = i / (_light_sources - 1)
-    contrib_a = vec3.scale(pnt_a, 1 - time)
-    contrib_b = vec3.scale(pnt_b, time)
-    pnt = vec3.add(contrib_a, contrib_b)
-    print(pnt)
-    LIGHT_SOURCES.append(LightSource(color, pnt))
+LIGHT_SOURCES = _get_light_ring()
 
 
 def _push_hsl(
@@ -378,13 +341,13 @@ def _push_hsl(
     return rgb_to_hex(hsl_to_rgb((hue, sat, lit)))
 
 
-diamond_material = set_material_color(
-    (0, 0, 1),
-    Material(
-        _push_hsl(shared.VIM_GREEN, hue_shift=20, sat_shift=-20, lit_shift=4),
-        ambient=3.5,
-        diffuse=5,
-        specular=1.5,
-    ),
-    *LIGHT_SOURCES_WHITE,
+# ===============================================================================
+#   material for the diamond bevels
+# ===============================================================================
+
+diamond_material = Material(
+    _push_hsl(shared.VIM_GREEN, hue_shift=30, sat_shift=-30, lit_shift=16),
+    ambient=3.5,
+    diffuse=5,
+    specular=1.5,
 )
