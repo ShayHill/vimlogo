@@ -6,8 +6,12 @@
 
 from pathlib import Path
 
-_PROJECT_DIR = Path(__file__).parent.parent.parent
+PROJECT_DIR = Path(__file__).parent.parent.parent
 
-REFERENCE_IMAGE_PATH = _PROJECT_DIR / "reference" / "vimlogo.svg"
+REFERENCE_IMAGE_PATH = PROJECT_DIR / "reference" / "vimlogo.svg"
 
-OUTPUT = _PROJECT_DIR / "output"
+OUTPUT = PROJECT_DIR / "output"
+
+PYPROJECT_TOML = PROJECT_DIR / "pyproject.toml"
+
+GIT_DIR = PROJECT_DIR / ".git"

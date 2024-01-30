@@ -23,7 +23,7 @@ stroke = ref_background_stroke_width
 FULL_OLINE_WIDTH = (bg_w - di_w) / 2 / pow(2, 1 / 2) + stroke / 2
 
 # combined padding for both sides (left + right or top + bottom)
-PAD = 5
+PAD = 1
 _geometry_width = (
     params_diamond.OD
     + 2 * params_diamond.STROKE_WIDTH * pow(2, 1 / 2)

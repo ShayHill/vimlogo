@@ -20,7 +20,7 @@ pillow==10.2.0
     # via svg-ultralight
 shapely==2.0.2
     # via vim_logo (pyproject.toml)
-svg-ultralight==0.22.0
+svg-ultralight==0.23.0
     # via vim_logo (pyproject.toml)
 vec2-math==0.4.1
     # via

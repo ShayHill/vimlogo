@@ -2,12 +2,12 @@
 [project]
 name = "vim_logo"
 version = "1.0.0"
-description = "The classic Vim logo with 'correct' bevels."
+description = "The classic Vim logo."
 authors = [{ name = "Shay Hill", email = "shay_public@hotmail.com" }]
-license = {text = "Current Vim License", file = "LICENSE"}
+license = {file = "LICENSE"}
 readme = "README.md"
-requires-python = ">=3.10"
-dependencies = ["basic_colormath", "lxml", "offset_poly>=0.3.3", "shapely", "svg_ultralight", "vec2_math"]
+requires-python = ">=3.11"
+dependencies = ["basic_colormath", "lxml", "offset_poly>=0.3.3", "shapely", "svg_ultralight>=0.23.0", "vec2_math"]
 
 [project.optional-dependencies]
 dev = ["commitizen", "types-lxml", "pre-commit", "pytest", "tox", "matplotlib"]
@@ -36,7 +36,7 @@ profile = "black"
 include = ["src"]
 exclude = ["**/__pycache__.py"]
 
-pythonVersion = "3.10"
+pythonVersion = "3.11"
 pythonPlatform = "Any"
 
 typeCheckingMode = "strict"
