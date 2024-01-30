@@ -37,8 +37,8 @@ from basic_colormath import (
     rgb_to_hsl,
 )
 
-from vim_logo import shared, vec3
-from vim_logo.vec3 import Vec3
+from vimlogo import shared, vec3
+from vimlogo.vec3 import Vec3
 
 RGB = Annotated[tuple[int, int, int], [0, 255]]
 

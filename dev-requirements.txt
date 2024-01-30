@@ -7,7 +7,7 @@
 argcomplete==3.1.6
     # via commitizen
 basic-colormath==0.1.0
-    # via vim_logo (pyproject.toml)
+    # via vimlogo (pyproject.toml)
 cachetools==5.3.2
     # via tox
 cfgv==3.4.0
@@ -22,7 +22,7 @@ colorama==0.4.6
     #   pytest
     #   tox
 commitizen==3.13.0
-    # via vim_logo (pyproject.toml)
+    # via vimlogo (pyproject.toml)
 contourpy==1.2.0
     # via matplotlib
 cycler==0.12.1
@@ -50,11 +50,11 @@ kiwisolver==1.4.5
 lxml==5.1.0
     # via
     #   svg-ultralight
-    #   vim_logo (pyproject.toml)
+    #   vimlogo (pyproject.toml)
 markupsafe==2.1.4
     # via jinja2
 matplotlib==3.8.2
-    # via vim_logo (pyproject.toml)
+    # via vimlogo (pyproject.toml)
 nodeenv==1.8.0
     # via pre-commit
 numpy==1.26.3
@@ -63,7 +63,7 @@ numpy==1.26.3
     #   matplotlib
     #   shapely
 offset-poly==0.3.3
-    # via vim_logo (pyproject.toml)
+    # via vimlogo (pyproject.toml)
 packaging==23.2
     # via
     #   commitizen
@@ -86,7 +86,7 @@ pluggy==1.4.0
     #   pytest
     #   tox
 pre-commit==3.6.0
-    # via vim_logo (pyproject.toml)
+    # via vimlogo (pyproject.toml)
 prompt-toolkit==3.0.36
     # via questionary
 pyparsing==3.1.1
@@ -94,7 +94,7 @@ pyparsing==3.1.1
 pyproject-api==1.6.1
     # via tox
 pytest==8.0.0
-    # via vim_logo (pyproject.toml)
+    # via vimlogo (pyproject.toml)
 python-dateutil==2.8.2
     # via matplotlib
 pyyaml==6.0.1
@@ -104,29 +104,29 @@ pyyaml==6.0.1
 questionary==2.0.1
     # via commitizen
 shapely==2.0.2
-    # via vim_logo (pyproject.toml)
+    # via vimlogo (pyproject.toml)
 six==1.16.0
     # via python-dateutil
 svg-ultralight==0.23.0
-    # via vim_logo (pyproject.toml)
+    # via vimlogo (pyproject.toml)
 termcolor==2.4.0
     # via commitizen
 tomlkit==0.12.3
     # via commitizen
 tox==4.12.1
-    # via vim_logo (pyproject.toml)
+    # via vimlogo (pyproject.toml)
 types-beautifulsoup4==4.12.0.20240106
     # via types-lxml
 types-html5lib==1.1.11.20240106
     # via types-beautifulsoup4
 types-lxml==2023.10.21
-    # via vim_logo (pyproject.toml)
+    # via vimlogo (pyproject.toml)
 typing-extensions==4.9.0
     # via types-lxml
 vec2-math==0.4.1
     # via
     #   offset-poly
-    #   vim_logo (pyproject.toml)
+    #   vimlogo (pyproject.toml)
 virtualenv==20.25.0
     # via
     #   pre-commit

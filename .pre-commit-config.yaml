@@ -132,6 +132,7 @@ repos:
   # C416 Unnecessary `list` comprehension
   # SLF001 Private member accessed
   # RUF007 Prefer `itertools.pairwise()` over `zip()`
+  # S603 subprocess call
   rev: 'v0.1.9'
   hooks:
     - id: ruff
@@ -139,7 +140,7 @@ repos:
       args:
       - --target-version=py311
       - --select=ALL
-      - --ignore=ANN101,ANN102,ANN201,ANN202,B905,COM812,D203,D213,D400,I001,ISC003,N802,N806,PERF401,PGH003,PLR0913,S320,PLR2004,C416,SLF001,RUF007
+      - --ignore=ANN101,ANN102,ANN201,ANN202,B905,COM812,D203,D213,D400,I001,ISC003,N802,N806,PERF401,PGH003,PLR0913,S320,PLR2004,C416,SLF001,RUF007,S603
       # - --fix
 
 # reads pyproject.toml for additional config

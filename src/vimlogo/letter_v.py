@@ -100,9 +100,9 @@ import vec2_math as vec2
 from offset_poly import offset_poly_per_edge
 from offset_poly.offset import PolyType
 
-from vim_logo import shared
-from vim_logo.glyphs import get_polygon_union, new_data_string
-from vim_logo.reference_paths import (
+from vimlogo import shared
+from vimlogo.glyphs import get_polygon_union, new_data_string
+from vimlogo.reference_paths import (
     get_dims,
     ref_v,
     ref_v_bevels,

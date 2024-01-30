@@ -5,68 +5,62 @@
 """
 
 import copy
+import subprocess
 import sys
+import tomllib
 from pathlib import Path
 
-from lxml.etree import _Element as EtreeElement # type: ignore
 import svg_ultralight as su
-
-from vim_logo import params_diamond, shared
-from vim_logo.diamond import diamond, diamond_outer
-from vim_logo.glyphs import gap_polygon, get_polygon_union, new_data_string
-from vim_logo.letter_v import V_STROKE_WIDTH, elem_v, v_outer
-from vim_logo.paths import PYPROJECT_TOML
-from vim_logo.letters_im import (
-    IM_STROKE_WIDTH,
-    elem_im,
-    letter_m_pts,
-    letter_m_pts_mask,
-)
-import subprocess
-from vim_logo.paths import OUTPUT, PROJECT_DIR
+from lxml.etree import _Element as EtreeElement  # type: ignore
 from svg_ultralight import new_metadata
 
+from vimlogo import params_diamond, shared
+from vimlogo.diamond import diamond, diamond_outer
+from vimlogo.glyphs import gap_polygon, get_polygon_union, new_data_string
+from vimlogo.letter_v import V_STROKE_WIDTH, elem_v, v_outer
+from vimlogo.letters_im import IM_STROKE_WIDTH, elem_im, letter_m_pts, letter_m_pts_mask
+from vimlogo.paths import OUTPUT, PROJECT_DIR, PYPROJECT_TOML
 
-import tomllib
 
+def _get_git_remote_url() -> str:
+    """Get the remote URL of the git repository.
 
-def _get_git_remote_url():
-    command = ['git', 'remote', '-v']
-    result = subprocess.run(command, cwd=PROJECT_DIR, capture_output=True, text=True)
+    :return: the remote URL
+    :raises RuntimeError: if the git command fails
+    """
+    command = ["git", "remote", "-v"]
+    result = subprocess.run(
+        command, cwd=PROJECT_DIR, capture_output=True, text=True, check=True
+    )
     if result.returncode == 0:
         output = result.stdout.strip()
-        lines = output.split('\n')
+        lines = output.split("\n")
         if lines:
-            # Extract remote URL from the first line
-            first_line = lines[0]
-            remote_url = first_line.split()[1]
-            return remote_url
-    # Return None if the command fails or no remote URL was found
-    return None
+            return lines[0].split()[1]
+
+    msg = f"Error: git remote -v returned {result.returncode}"
+    raise RuntimeError(msg)
 
 
 def _extract_metadata() -> EtreeElement:
-    """Extract metadata from pyproject.toml and git.
-    """
-    with open(PYPROJECT_TOML, 'rb') as toml_file:
+    """Extract metadata from pyproject.toml and git."""
+    with PYPROJECT_TOML.open("rb") as toml_file:
         toml_data = tomllib.load(toml_file)
-    project_data = toml_data['project']
+    project_data = toml_data["project"]
 
     remote_url = _get_git_remote_url()
-    assert remote_url
 
     return new_metadata(
-        title = f"{project_data['name']} {project_data['version']}",
-        creator = ",".join([x['name'] for x in project_data['authors']]),
-        description = project_data['description'],
-        source = remote_url,
-        relation = "https://github.com/vim/vim",
-        rights = "https://github.com/vim/vim/blob/master/LICENSE"
+        title=f"{project_data['name']} {project_data['version']}",
+        creator=",".join([x["name"] for x in project_data["authors"]]),
+        description=project_data["description"],
+        source=remote_url,
+        relation="https://github.com/vim/vim",
+        rights="https://github.com/vim/vim/blob/master/LICENSE",
     )
 
 
-
-def write_vim_logo(output_path: Path | str = OUTPUT / "vim_logo.svg"):
+def write_vim_logo(output_path: Path | str = OUTPUT / "vimlogo.svg"):
     """Write the vim logo to a file.
 
     :param output_path: path to write the svg to
@@ -99,11 +93,7 @@ def write_vim_logo(output_path: Path | str = OUTPUT / "vim_logo.svg"):
     d_background = new_data_string(*background_paths)
     root.append(
         su.new_sub_element(
-            root,
-            "path",
-            id_ = "background",
-            d=d_background,
-            fill=shared.FULL_OLINE_COLOR,
+            root, "path", id_="background", d=d_background, fill=shared.FULL_OLINE_COLOR
         )
     )
 

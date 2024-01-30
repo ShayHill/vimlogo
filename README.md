@@ -1,9 +1,9 @@
-# vim_logo
+# vimlogo
 
 The classic Vim logo.
 
 <picture>
-  <img alt="Vim logo" src="output/vim_logo.png">
+  <img alt="Vim logo" src="output/vimlogo.png">
 </picture>
 
 There are a few versions of this kicking around, but to me *the* Vim logo is the svg on vim.org. There are several bits of "character" that set it apart:
@@ -35,4 +35,4 @@ I didn't want to "fix" the idiosyncracies of the logo, but I did want to fix the
 
 Lot's of notes on smaller decisions about individual plot points in the source files. I tried to document all of the compromises should I or someone else wish to revisit them in the future.
 
-Find the file in `output/vim_logo.svg`.
+Find the file in `output/vimlogo.svg`.

@@ -6,8 +6,8 @@
 
 import vec2_math as vec2
 
-from vim_logo import params_diamond
-from vim_logo.reference_paths import (
+from vimlogo import params_diamond
+from vimlogo.reference_paths import (
     get_dims,
     ref_background,
     ref_background_stroke_width,

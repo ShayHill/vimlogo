@@ -19,9 +19,9 @@ from typing import TYPE_CHECKING
 import svg_ultralight as su
 import vec2_math as vec2
 
-from vim_logo import shared
-from vim_logo.glyphs import gap_polygon, get_polygon_union, new_data_string
-from vim_logo.reference_paths import (
+from vimlogo import shared
+from vimlogo.glyphs import gap_polygon, get_polygon_union, new_data_string
+from vimlogo.reference_paths import (
     get_dims,
     ref_i_dot,
     ref_m,

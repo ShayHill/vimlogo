@@ -15,7 +15,7 @@ import vec2_math as vec2
 from lxml import etree
 from lxml.etree import _Element as EtreeElement  # type: ignore
 
-from vim_logo.paths import REFERENCE_IMAGE_PATH
+from vimlogo.paths import REFERENCE_IMAGE_PATH
 
 
 def _get_reference_root() -> EtreeElement:

@@ -5,9 +5,9 @@
 """
 
 
-from vim_logo.glyphs import _remove_identical_adjacent_values  # type: ignore
+from vimlogo.glyphs import _remove_identical_adjacent_values  # type: ignore
 
-from vim_logo import glyphs
+from vimlogo import glyphs
 from typing import TypeVar
 
 _T = TypeVar("_T")

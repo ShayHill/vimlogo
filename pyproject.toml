@@ -1,6 +1,6 @@
 
 [project]
-name = "vim_logo"
+name = "vimlogo"
 version = "1.1.0"
 description = "The classic Vim logo."
 authors = [{ name = "Shay Hill", email = "shay_public@hotmail.com" }]

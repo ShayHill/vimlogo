@@ -6,7 +6,7 @@
 
 from pathlib import Path
 
-from vim_logo.main import write_vim_logo
+from vimlogo.main import write_vim_logo
 
 _TEST_OUTPUT = Path(__file__).parent / "test_output"
 

@@ -5,24 +5,24 @@
 #    pip-compile --output-file=requirements.txt --strip-extras pyproject.toml
 #
 basic-colormath==0.1.0
-    # via vim_logo (pyproject.toml)
+    # via vimlogo (pyproject.toml)
 lxml==5.1.0
     # via
     #   svg-ultralight
-    #   vim_logo (pyproject.toml)
+    #   vimlogo (pyproject.toml)
 numpy==1.26.3
     # via shapely
 offset-poly==0.3.3
-    # via vim_logo (pyproject.toml)
+    # via vimlogo (pyproject.toml)
 paragraphs==0.2.0
     # via svg-ultralight
 pillow==10.2.0
     # via svg-ultralight
 shapely==2.0.2
-    # via vim_logo (pyproject.toml)
+    # via vimlogo (pyproject.toml)
 svg-ultralight==0.23.0
-    # via vim_logo (pyproject.toml)
+    # via vimlogo (pyproject.toml)
 vec2-math==0.4.1
     # via
     #   offset-poly
-    #   vim_logo (pyproject.toml)
+    #   vimlogo (pyproject.toml)

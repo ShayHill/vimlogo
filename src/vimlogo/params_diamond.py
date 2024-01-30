@@ -9,7 +9,7 @@ from them.
 :created: 2024-01-10
 """
 
-from vim_logo.reference_paths import (
+from vimlogo.reference_paths import (
     get_dims,
     ref_diamond_inner,
     ref_diamond_oline,
