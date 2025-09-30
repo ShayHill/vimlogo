@@ -127,7 +127,7 @@ vec2-math==0.4.1
     # via
     #   offset-poly
     #   vimlogo (pyproject.toml)
-virtualenv==20.25.0
+virtualenv==20.26.6
     # via
     #   pre-commit
     #   tox
