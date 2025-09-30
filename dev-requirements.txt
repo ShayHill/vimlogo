@@ -73,7 +73,7 @@ packaging==23.2
     #   tox
 paragraphs==0.2.0
     # via svg-ultralight
-pillow==10.2.0
+pillow==10.3.0
     # via
     #   matplotlib
     #   svg-ultralight
