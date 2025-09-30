@@ -16,7 +16,7 @@ offset-poly==0.3.3
     # via vimlogo (pyproject.toml)
 paragraphs==0.2.0
     # via svg-ultralight
-pillow==10.2.0
+pillow==10.3.0
     # via svg-ultralight
 shapely==2.0.2
     # via vimlogo (pyproject.toml)
