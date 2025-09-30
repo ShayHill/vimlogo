@@ -133,7 +133,7 @@ virtualenv==20.26.6
     #   tox
 wcwidth==0.2.13
     # via prompt-toolkit
-zipp==3.17.0
+zipp==3.19.1
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
