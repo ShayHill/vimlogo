@@ -4,9 +4,14 @@
 :created: 2023-10-07
 """
 
-from typing import Any
+import pytest
 
-def pytest_assertrepr_compare(config: Any, op: str, left: str, right: str):
+
+def pytest_assertrepr_compare(
+    config: pytest.Config, op: str, left: str, right: str
+) -> list[str] | None:
     """See full error diffs"""
+    del config
     if op in ("==", "!="):
-        return ["{0} {1} {2}".format(left, op, right)]
+        return [f"{left} {op} {right}"]
+    return None

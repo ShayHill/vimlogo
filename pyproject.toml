@@ -1,21 +1,42 @@
-
 [project]
 name = "vimlogo"
 version = "1.1.0"
 description = "The classic Vim logo."
-authors = [{ name = "Shay Hill", email = "shay_public@hotmail.com" }]
-license = {file = "LICENSE"}
+authors = [{ name = "Shay Hill", email = "shay_public@hotmail.com"}]
+license-files = ["LICENSE"]
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = ["basic_colormath", "lxml", "offset_poly>=0.3.3", "shapely", "svg_ultralight>=0.23.0", "vec2_math"]
-
-[project.optional-dependencies]
-dev = ["commitizen", "types-lxml", "pre-commit", "pytest", "tox", "matplotlib"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
+]
+dependencies = [
+    "basic-colormath>=1.1.2",
+    "lxml>=6.1.1",
+    "offset-poly>=0.5.0",
+    "shapely>=2.1.2",
+    "svg-ultralight>=0.109.1",
+    "vec2-math>=0.7.0",
+]
 
 [build-system]
-requires = ["setuptools", "setuptools-scm"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.11.25,<0.12.0"]
+build-backend = "uv_build"
 
+[dependency-groups]
+dev = [
+    "commitizen>=4.17.0",
+    "matplotlib>=3.11.1",
+    "pre-commit>=4.6.1",
+    "pytest>=9.1.1",
+    "types-lxml>=2026.2.16",
+]
 
 
 [tool.commitizen]
@@ -26,28 +47,72 @@ major-version-zero = true
 version_files = ["pyproject.toml:^version"]
 
 
-
 [tool.isort]
 profile = "black"
 
 
+[tool.pytest.ini_options]
+addopts = "--doctest-modules"
+pythonpath = "tests"
+testpaths = ["tests"]
+log_cli = true
+
+
+[tool.ruff]
+target-version = "py311"
+exclude = ["typings", ".venv"]
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*.py" = [
+    "S101",
+    "D",
+    "F401",
+] # Ignore assertions, docstrings, unused imports in test files
+
+[tool.ruff.format]
+docstring-code-line-length = 88
+skip-magic-trailing-comma = true
+
+[tool.ruff.lint.isort]
+# keep isort consistent with format.skip-magic-trailing-comma
+split-on-trailing-comma = false
+
+[tool.ruff.lint]
+select = ["ALL"]
+# only auto-fix __all__ sorting (RUF022) and import sorting (I)
+fixable = ["RUF022", "I"]
+ignore = [
+    "COM812",  # trailing comma missing (does not agree with Black)
+    "D203",    # 1 blank line before class docstring (incompatible with D211)
+    "D213",    # multi-line summary second line (incompatible with D212)
+    "ISC003",  # explicitly concatenated string should be implicit
+    "FLY",     # Use f-string instead of ...
+    "S311",    # Standard pseudo-random generators are not suitable for security/cryptographic purposes
+    "S301",    # don't use pickle
+    "CPY001",  # copyrite notice should be present in each file
+]
+
 
 [tool.pyright]
-include = ["src"]
+include = ["src", "tests"]
 exclude = ["**/__pycache__.py"]
+ignore = ["typings", ".venv"]
 
 pythonVersion = "3.11"
-pythonPlatform = "Any"
+pythonPlatform = "All"
 
 typeCheckingMode = "strict"
-reportShadowedImports = true
 reportCallInDefaultInitializer = true
 reportImplicitStringConcatenation = true
-# reportMissingSuperCall = true
 reportPropertyTypeMismatch = true
 reportUninitializedInstanceVariable = true
 reportUnnecessaryTypeIgnoreComment = true
 reportUnusedCallResult = true
 
 venvPath = "."
-venv = "./venv"
+venv = "./.venv"
+
+[[tool.pyright.executionEnvironments]]
+root = "tests"

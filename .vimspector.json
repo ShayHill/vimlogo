@@ -1,17 +1,4 @@
 {
-  "$schema": "https://puremourning.github.io/vimspector/schema/vimspector.schema.json",
-  "adapters": {
-    "run_with_debugpy": {
-      "command": [
-        "${workspaceRoot}/run_with_debugpy"
-      ],
-      "env": {
-        "DEBUG_PORT": "9876"
-      },
-      "extends": "debugpy",
-      "port": 9876
-    }
-  },
   "configurations": {
     "run": {
       "adapter": "debugpy",
@@ -24,13 +11,14 @@
         }
       },
       "configuration": {
-        "console": "integratedTerminal",
         "cwd": "${workspaceRoot}",
         "name": "run this Python file",
         "program": "${file}",
-        "python": "${workspaceRoot}/venv/Scripts/python.exe",
+        "python": "${workspaceRoot}/.venv/Scripts/python.exe",
+        "pythonArgs": [
+          "-Xfrozen_modules=off"
+        ],
         "request": "launch",
-        "stopOnEntry": false,
         "type": "python"
       }
     },
@@ -38,19 +26,21 @@
       "adapter": "debugpy",
       "breakpoints": {
         "exception": {
+          "caught": "N",
           "raised": "N",
-          "uncaught": "",
-          "userUnhandled": ""
+          "uncaught": "Y",
+          "userUnhandled": "N"
         }
       },
       "configuration": {
-        "console": "integratedTerminal",
         "cwd": "${workspaceRoot}",
         "name": "run main.py",
-        "program": "${workspaceRoot}/src/vim_logo/main.py",
-        "python": "${workspaceRoot}/venv/Scripts/python.exe",
+        "program": "${workspaceRoot}/src/vimlogo/main.py",
+        "python": "${workspaceRoot}/.venv/Scripts/python.exe",
+        "pythonArgs": [
+          "-Xfrozen_modules=off"
+        ],
         "request": "launch",
-        "stopOnEntry": false,
         "type": "python"
       }
     },
@@ -69,9 +59,13 @@
           "-q",
           "${file}"
         ],
+        "cwd": "${workspaceRoot}",
         "module": "pytest",
         "name": "run this test file",
-        "python": "${workspaceRoot}/venv/Scripts/python.exe",
+        "python": "${workspaceRoot}/.venv/Scripts/python.exe",
+        "pythonArgs": [
+          "-Xfrozen_modules=off"
+        ],
         "request": "launch",
         "type": "python"
       }
