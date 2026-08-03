@@ -18,6 +18,7 @@ classifiers = [
 ]
 dependencies = [
     "basic-colormath>=1.1.2",
+    "cubic-bezier-spline>=0.21.0",
     "lxml>=6.1.1",
     "offset-poly>=0.5.0",
     "shapely>=2.1.2",

@@ -295,6 +295,23 @@ wheels = [
 ]
 
 [[package]]
+name = "cubic-bezier-spline"
+version = "0.21.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "numpy", version = "2.5.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+    { name = "paragraphs" },
+    { name = "svg-path-data" },
+    { name = "typing-extensions" },
+    { name = "vec2-math" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/3c/a8/18238b0a965719e67869a246ee6492bb002115910ddbb9d047a9fc92e158/cubic_bezier_spline-0.21.0.tar.gz", hash = "sha256:5ce197a7c60913a74f9472c985172e94ccfa880a46782d643898d40138131dc0", size = 12657, upload-time = "2025-10-06T01:52:42.057Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4d/91/f7322f85bbadc875019cfb0f175a61e8788071de5a45a3c0e2af9d838717/cubic_bezier_spline-0.21.0-py3-none-any.whl", hash = "sha256:103fdf68408413e1c85ce4e414877548a110ea15a03590159711a6c3ed657c65", size = 17198, upload-time = "2025-10-06T01:52:40.93Z" },
+]
+
+[[package]]
 name = "cycler"
 version = "0.12.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1413,10 +1430,11 @@ wheels = [
 
 [[package]]
 name = "vimlogo"
-version = "0.1.0"
+version = "1.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "basic-colormath" },
+    { name = "cubic-bezier-spline" },
     { name = "lxml" },
     { name = "offset-poly" },
     { name = "shapely" },
@@ -1436,6 +1454,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "basic-colormath", specifier = ">=1.1.2" },
+    { name = "cubic-bezier-spline", specifier = ">=0.21.0" },
     { name = "lxml", specifier = ">=6.1.1" },
     { name = "offset-poly", specifier = ">=0.5.0" },
     { name = "shapely", specifier = ">=2.1.2" },
