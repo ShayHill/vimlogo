@@ -13,7 +13,7 @@ from collections.abc import Iterable
 
 import vec2_math as vec2
 from lxml import etree
-from lxml.etree import _Element as EtreeElement  # type: ignore
+from lxml.etree import _Element as EtreeElement  # pyright: ignore[reportPrivateUsage]
 
 from vimlogo.paths import REFERENCE_IMAGE_PATH
 
@@ -108,7 +108,7 @@ def _get_pts_from_datastring(datastring: str) -> list[tuple[float, float]]:
 
 
 def _get_bounds(
-    pts: Iterable[tuple[float, float]]
+    pts: Iterable[tuple[float, float]],
 ) -> tuple[tuple[float, float], tuple[float, float]]:
     """Get the footprint of a list of points."""
     min_x = min(pt[0] for pt in pts)
@@ -144,7 +144,7 @@ def _get_pts_multi(name_startswith: str) -> list[tuple[float, float]]:
 
 
 def start_from_first_lexigraphically_sorted_point(
-    pts: list[tuple[float, float]]
+    pts: list[tuple[float, float]],
 ) -> list[tuple[float, float]]:
     """Start the list of points from the first lexigraphically sorted point.
 

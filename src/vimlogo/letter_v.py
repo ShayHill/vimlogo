@@ -111,7 +111,9 @@ from vimlogo.reference_paths import (
 )
 
 if TYPE_CHECKING:
-    from lxml.etree import _Element as EtreeElement  # type: ignore
+    from lxml.etree import (
+        _Element as EtreeElement,  # pyright: ignore[reportPrivateUsage]
+    )
 
 TWO_VEC2 = tuple[tuple[float, float], tuple[float, float]]
 
@@ -268,7 +270,7 @@ def _bevel_90_turns(pts: list[tuple[float, float]]) -> list[tuple[float, float]]
         points, each a hard-coded distance away from the original point.
     """
     new_pts: list[tuple[float, float]] = []
-    for a, b, c in zip(pts[-1:] + pts[:-1], pts, pts[1:] + pts[:1]):
+    for a, b, c in zip(pts[-1:] + pts[:-1], pts, pts[1:] + pts[:1], strict=True):
         vec_ba = vec2.set_norm(vec2.vsub(a, b), SML_BEV)
         vec_cb = vec2.set_norm(vec2.vsub(b, c), SML_BEV)
         angle = vec2.get_signed_angle(vec_ba, vec_cb)
@@ -281,7 +283,7 @@ def _bevel_90_turns(pts: list[tuple[float, float]]) -> list[tuple[float, float]]
 
 
 def _bevel_and_refine_letter_v_outline(
-    pts: list[tuple[float, float]]
+    pts: list[tuple[float, float]],
 ) -> tuple[list[tuple[float, float]], list[tuple[float, float]]]:
     """Refine the letter V outline to match the vim.org logo.
 
@@ -324,9 +326,9 @@ def _bevel_and_refine_letter_v_outline(
     return inner, outer
 
 
-def _get_translated_v_outlines() -> (
-    tuple[list[tuple[float, float]], list[tuple[float, float]]]
-):
+def _get_translated_v_outlines() -> tuple[
+    list[tuple[float, float]], list[tuple[float, float]]
+]:
     """Get the outlines of the letter V, translated to the reference position.
 
     :return: inner and outer points. There will be one more point in the outer list,
@@ -373,7 +375,7 @@ def _new_letter_v() -> EtreeElement:
 
     letter_v = su.new_element("g", id="letter_v")
 
-    def add_path(id_: str, d: str, **attributes: str | float):
+    def add_path(id_: str, d: str, **attributes: str | float) -> None:
         """Add a new subelement path to letter_v."""
         _ = su.new_sub_element(letter_v, "path", id_=id_, d=d, **attributes)
 
@@ -389,7 +391,7 @@ def _new_letter_v() -> EtreeElement:
     ]
     dim_bevel_style = {"fill": shared.GRAY_DIM, **shared.PIN_STROKE}
     for i, d_bevel in enumerate(new_data_string(x) for x in dim_bevels):
-        _ = add_path(id_=f"v_dim_bevel_{i}", d=d_bevel, **dim_bevel_style)
+        add_path(id_=f"v_dim_bevel_{i}", d=d_bevel, **dim_bevel_style)
     # end dim bevels
 
     add_path(id_="v_face", d=d_inner, fill=shared.VIM_GRAY, **shared.PIN_STROKE)

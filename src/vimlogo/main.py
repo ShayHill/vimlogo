@@ -11,7 +11,7 @@ import tomllib
 from pathlib import Path
 
 import svg_ultralight as su
-from lxml.etree import _Element as EtreeElement  # type: ignore
+from lxml.etree import _Element as EtreeElement  # pyright: ignore[reportPrivateUsage]
 from svg_ultralight import new_metadata
 
 from vimlogo import params_diamond, shared
@@ -29,7 +29,7 @@ def _get_git_remote_url() -> str:
     :raises RuntimeError: if the git command fails
     """
     command = ["git", "remote", "-v"]
-    result = subprocess.run(
+    result = subprocess.run(  # noqa: S603
         command, cwd=PROJECT_DIR, capture_output=True, text=True, check=True
     )
     if result.returncode == 0:
@@ -60,7 +60,7 @@ def _extract_metadata() -> EtreeElement:
     )
 
 
-def write_vim_logo(output_path: Path | str = OUTPUT / "vimlogo.svg"):
+def write_vim_logo(output_path: Path | str = OUTPUT / "vimlogo.svg") -> None:
     """Write the vim logo to a file.
 
     :param output_path: path to write the svg to

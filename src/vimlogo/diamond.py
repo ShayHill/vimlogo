@@ -20,13 +20,16 @@ from typing import TYPE_CHECKING
 import svg_ultralight as su
 import vec2_math as vec2
 
-from vimlogo import params_diamond as params, shared, vec3
+from vimlogo import params_diamond as params
+from vimlogo import shared, vec3
 from vimlogo.glyphs import gap_polygon, get_polygon_union, new_data_string
 from vimlogo.illumination import LIGHT_SOURCES, diamond_material, illuminate
 from vimlogo.letters_im import letter_m_pts_mask
 
 if TYPE_CHECKING:
-    from lxml.etree import _Element as EtreeElement  # type: ignore
+    from lxml.etree import (
+        _Element as EtreeElement,  # pyright: ignore[reportPrivateUsage]
+    )
 
     from vimlogo.vec3 import Vec3
 

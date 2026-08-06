@@ -75,7 +75,7 @@ def vsum(*vectors: Vec3) -> Vec3:
     :param vectors: an iterable of three-component vectors
     :return: the component-wise sum of the vectors
     """
-    x, y, z = (sum(c) for c in zip(*vectors))
+    x, y, z = (sum(c) for c in zip(*vectors, strict=True))
     return x, y, z
 
 

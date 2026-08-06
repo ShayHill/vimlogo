@@ -32,7 +32,9 @@ from vimlogo.reference_paths import (
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from lxml.etree import _Element as EtreeElement  # type: ignore
+    from lxml.etree import (
+        _Element as EtreeElement,  # pyright: ignore[reportPrivateUsage]
+    )
 
 
 # ===============================================================================

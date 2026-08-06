@@ -11,5 +11,5 @@ from vimlogo.main import write_vim_logo
 _TEST_OUTPUT = Path(__file__).parent / "test_output"
 
 
-def test_reference():
+def test_reference() -> None:
     write_vim_logo(_TEST_OUTPUT / "test_reference.svg")

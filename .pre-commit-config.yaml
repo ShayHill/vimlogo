@@ -1,7 +1,7 @@
 ci:
   skip: [pyright]
 
-exclude: "typings|tests"
+# exclude: "typings|tests"
 
 repos:
 
@@ -59,43 +59,7 @@ repos:
   hooks:
   - id: remove-tabs
 
-# - repo: https://github.com/commitizen-tools/commitizen
-#   rev: v2.40.0
-#   hooks:
-#   - id: commitizen
-
-# # This will only work with pylint installed in the venv
-# - repo: local
-#   hooks:
-#   - id: pylint
-#     exclude: "tests"
-#     name: pylint
-#     entry: ./.venv/Scripts/pylint.exe
-#     language: system
-#     types: [python]
-#     args:
-#     - --ignore-patterns=.venv
-#     - --good-names=i,j,_,f
-#     # - --disable=protected-access
-#     # - --disable=no-member
-#     # - --disable=import-error
-#     # - --disable=no-name-in-module
-#     - --disable=redundant-returns-doc # many false positives
-#     - --disable=too-many-arguments
-#     - --disable=too-many-instance-attributes
-#     - --disable=redefined-builtin # sticking with edge.next
-#     - --disable=invalid-name # for _TMeshElem and similar type hints
-#     - --disable=useless-return # conflicts with mypy
-#     - --disable=assignment-from-no-return # prevents overloading Attrib methods to only raise an Exception
-#     - --disable=useless-parent-delegation
-#     - --disable=R0801 # Similar lines in multiple files
-#     - --load-plugins=pylint.extensions.docparams
-#     - --accept-no-param-doc=n
-#     - --accept-no-raise-doc=n
-#     - --accept-no-return-doc=n
-#     - --accept-no-yields-doc=n
-
-# ruff config (select/ignore/fixable/target-version) lives in pyproject.toml
+# ruff config in pyproject.toml
 - repo: https://github.com/charliermarsh/ruff-pre-commit
   rev: 'v0.16.1'
   hooks:
@@ -104,7 +68,7 @@ repos:
     - id: ruff-format
       name: "ruff-format"
 
-# basedpyright config (select/ignore/fixable/target-version) lives in pyproject.toml
+# basedpyright config in pyproject.toml
 - repo: https://github.com/DetachHead/basedpyright-pre-commit-mirror
   rev: 1.39.9
   hooks:

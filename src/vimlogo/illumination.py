@@ -309,7 +309,7 @@ def _get_light_ring() -> list[LightSource]:
     lits = [x * LIGHT_INTENSITY / sum(lits) for x in lits]
 
     light_sources: list[LightSource] = []
-    for loc, lit in zip(locs, lits):
+    for loc, lit in zip(locs, lits, strict=True):
         rgb = (lit * LIGHT_COLOR[0], lit * LIGHT_COLOR[1], lit * LIGHT_COLOR[2])
         if max(rgb) == 0:
             continue
