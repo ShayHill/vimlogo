@@ -13,14 +13,12 @@ They are a *very* good fit on a 60-unit x-height grid.
 
 from __future__ import annotations
 
-import functools as ft
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
-import svg_ultralight as su
 import vec2_math as vec2
 
 from vimlogo import shared
-from vimlogo.glyphs import gap_polygon, get_polygon_union, new_data_string
+from vimlogo.glyphs import gap_polygon
 from vimlogo.reference_paths import (
     get_dims,
     ref_i_dot,
@@ -31,10 +29,6 @@ from vimlogo.reference_paths import (
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
-
-    from lxml.etree import (
-        _Element as EtreeElement,  # pyright: ignore[reportPrivateUsage]
-    )
 
 
 # ===============================================================================
@@ -67,18 +61,18 @@ letter_m_pts = _snap_pts(ref_m)
 letter_m_pts[13] = (113.5, -52.5)
 
 # The reference i stem is a mess. Build a new one from leg points in the m
-letter_i_pts_stem = letter_m_pts[:5] + letter_m_pts[26:]
+letter_i_stem = letter_m_pts[:5] + letter_m_pts[26:]
 
 # everything is good except point 4. Make the top as wide as the bottom
-bottom_vec = vec2.vsub(letter_i_pts_stem[-1], letter_i_pts_stem[0])
-letter_i_pts_stem[4] = vec2.vadd(letter_i_pts_stem[3], bottom_vec)
+bottom_vec = vec2.vsub(letter_i_stem[-1], letter_i_stem[0])
+letter_i_stem[4] = vec2.vadd(letter_i_stem[3], bottom_vec)
 
 # move the i stem to the left of the m (where a 4th leg would be)
 one_leg_to_the_left = vec2.vsub(letter_m_pts[22], letter_m_pts[16])
-letter_i_pts_stem = [vec2.vadd(x, one_leg_to_the_left) for x in letter_i_pts_stem]
+letter_i_stem = [vec2.vadd(x, one_leg_to_the_left) for x in letter_i_stem]
 
 # the dots are fine
-letter_i_pts_dot = _snap_pts(ref_i_dot)
+letter_i_dot = _snap_pts(ref_i_dot)
 
 
 # ===============================================================================
@@ -122,34 +116,24 @@ def _transform_points(pts: Iterable[tuple[float, float]]) -> list[tuple[float, f
 
 
 letter_m_pts = _transform_points(letter_m_pts)
-letter_m_pts_mask = letter_m_pts[:17]
-letter_i_pts_stem = _transform_points(letter_i_pts_stem)
-letter_i_pts_dot = _transform_points(letter_i_pts_dot)
+letter_m_mask = letter_m_pts[:17]
+letter_i_stem = _transform_points(letter_i_stem)
+letter_i_dot = _transform_points(letter_i_dot)
 
 
-# ===============================================================================
-#   Create a `g` element for the letters i and m
-# ===============================================================================
+class LetterIM(NamedTuple):
+    """A named tuple for the letters i and m in Vim."""
+
+    ols: list[list[tuple[float, float]]]
+    mask_ol: list[tuple[float, float]]
+    faces: list[list[tuple[float, float]]]
 
 
-def _new_elem_im() -> EtreeElement:
-    """Create a `g` svg element for the combined letters i and m.
-
-    :return: `g` svg element with an outline and a face for each of i_stem, i_dot,
-        and m. There may be fewer than 3 outline paths if the outlines overlap.
-    """
-    point_lists = [letter_i_pts_stem, letter_i_pts_dot, letter_m_pts]
-    face_d = new_data_string(*point_lists)
-
+def _new_letters_im() -> LetterIM:
+    point_lists = [letter_i_stem, letter_i_dot, letter_m_pts]
     im_oline = [gap_polygon(pts, IM_STROKE_WIDTH) for pts in point_lists]
-    im_oline_paths = get_polygon_union(*im_oline)
-    oline_d = new_data_string(*im_oline_paths)
-
-    group = su.new_element("g", id_="letters_im")
-    add_path = ft.partial(su.new_sub_element, group, "path")
-    _ = add_path(id_="im_outline", d=oline_d, fill=shared.K_STROKE)
-    _ = add_path(id_="im_face", d=face_d, fill=shared.VIM_GRAY)
-    return group
+    mask_ol = gap_polygon(letter_m_mask, IM_STROKE_WIDTH)
+    return LetterIM(ols=im_oline, mask_ol=mask_ol, faces=point_lists)
 
 
-elem_im = _new_elem_im()
+im_cpts = _new_letters_im()

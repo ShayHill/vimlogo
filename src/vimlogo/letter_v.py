@@ -93,15 +93,14 @@ ref_outer = start_from_first_lexigraphically_sorted_point(ref_outer)
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING
+from typing import NamedTuple
 
-import svg_ultralight as su
 import vec2_math as vec2
 from offset_poly import offset_poly_per_edge
 from offset_poly.offset import PolyType
 
 from vimlogo import shared
-from vimlogo.glyphs import get_polygon_union, new_data_string
+from vimlogo.glyphs import gap_polygon
 from vimlogo.reference_paths import (
     get_dims,
     ref_v,
@@ -109,11 +108,6 @@ from vimlogo.reference_paths import (
     ref_v_oline,
     ref_view_center,
 )
-
-if TYPE_CHECKING:
-    from lxml.etree import (
-        _Element as EtreeElement,  # pyright: ignore[reportPrivateUsage]
-    )
 
 TWO_VEC2 = tuple[tuple[float, float], tuple[float, float]]
 
@@ -353,50 +347,48 @@ def _get_translated_v_outlines() -> tuple[
 v_inner, v_outer = _get_translated_v_outlines()
 
 
-def _new_letter_v() -> EtreeElement:
-    """Create a `g` svg element for the letter V.
 
-    :return: `g` svg element.
 
-    This is the only element where the outline is not uniform. The outline on the
-    left side of the vertical v stroke is a bit thicker.
-    """
-    d_outer = new_data_string(v_outer)
-    d_inner = new_data_string(v_inner)
+class LetterV(NamedTuple):
+    """A named tuple for the letters i and m in Vim."""
 
+    ol: list[tuple[float, float]]
+    outer: list[tuple[float, float]]
+    inner: list[tuple[float, float]]
+    face: list[tuple[float, float]]
+    dim_bevels: list[list[tuple[float, float]]]
+    lit_bevels: list[list[tuple[float, float]]]
+
+
+def _new_letter_v() -> LetterV:
     oline_bevels = [-LRG_BEV] * len(v_outer)
     oline_bevels[18] = -BEVEL_MN
     oline = [
         x.xsect for x in offset_poly_per_edge(v_outer, oline_bevels, PolyType.POLYGON)
     ]
+    sw = shared.PIN_STROKE_WIDTH / 2
+    lit_bevels = [
+        [*v_outer[-2:], *v_outer[:4], *v_inner[:2][::-1], v_inner[-1]],
+        [*v_outer[7:9], *v_inner[7:10][::-1]],
+        [*v_outer[10:16], *v_inner[11:15][::-1]],
+        [*v_outer[18:21], *v_inner[19:21][::-1]],
+    ]
 
-    oline_paths = get_polygon_union(oline)
-    d_oline = new_data_string(*oline_paths)
-
-    letter_v = su.new_element("g", id="letter_v")
-
-    def add_path(id_: str, d: str, **attributes: str | float) -> None:
-        """Add a new subelement path to letter_v."""
-        _ = su.new_sub_element(letter_v, "path", id_=id_, d=d, **attributes)
-
-    add_path(id_="v_outline", d=d_oline, fill=shared.FAT_STROKE_COLOR)
-    add_path(id_="v_lit_bevels", d=d_outer, fill=shared.GRAY_LIT, **shared.PIN_STROKE)
-
-    # begin dim bevels
     dim_bevels = [
         [*v_outer[3:8], *v_inner[2:8][::-1]],
         [*v_outer[9:11], *v_inner[9:12][::-1]],
-        [*v_outer[15:19], *v_inner[14:21][::-1]],
+        [*v_outer[15:19], *v_inner[14:20][::-1]],
         [*v_outer[20:22], *v_inner[20:23][::-1]],
     ]
-    dim_bevel_style = {"fill": shared.GRAY_DIM, **shared.PIN_STROKE}
-    for i, d_bevel in enumerate(new_data_string(x) for x in dim_bevels):
-        add_path(id_=f"v_dim_bevel_{i}", d=d_bevel, **dim_bevel_style)
-    # end dim bevels
+    return LetterV(
+        ol=oline,
+        outer=v_outer,
+        inner=v_inner,
+        face=gap_polygon(v_inner, -sw),
+        dim_bevels=[gap_polygon(x, -sw) for x in dim_bevels],
+        lit_bevels=[gap_polygon(x, -sw) for x in lit_bevels],
+        # dim_bevels =dim_bevels
+    )
 
-    add_path(id_="v_face", d=d_inner, fill=shared.VIM_GRAY, **shared.PIN_STROKE)
 
-    return letter_v
-
-
-elem_v = _new_letter_v()
+v_cpts = _new_letter_v()

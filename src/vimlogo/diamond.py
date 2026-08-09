@@ -14,23 +14,17 @@ right way to do it.
 
 from __future__ import annotations
 
-import functools as ft
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
-import svg_ultralight as su
 import vec2_math as vec2
 
 from vimlogo import params_diamond as params
 from vimlogo import shared, vec3
-from vimlogo.glyphs import gap_polygon, get_polygon_union, new_data_string
+from vimlogo.glyphs import gap_polygon, get_polygon_union
 from vimlogo.illumination import LIGHT_SOURCES, diamond_material, illuminate
-from vimlogo.letters_im import letter_m_pts_mask
+from vimlogo.letters_im import letter_m_mask
 
 if TYPE_CHECKING:
-    from lxml.etree import (
-        _Element as EtreeElement,  # pyright: ignore[reportPrivateUsage]
-    )
-
     from vimlogo.vec3 import Vec3
 
 
@@ -91,43 +85,49 @@ def _subtract_m(pts: list[tuple[float, float]]) -> str:
     return new_data_string(*paths)
 
 
-def _illuminate_bevel(pts: list[tuple[float, float]]) -> str:
+def illuminate_bevel(pts: list[tuple[float, float]]) -> str:
     """Illuminate a bevel.
 
     :param pts: xy polygon points
     :return: hex color of the illuminated bevel
     """
-    normal = _get_bevel_surface_normal(pts[0], pts[1], _BEVEL_SLOPE)
+    normal = _get_bevel_surface_normal(pts[1], pts[0], _BEVEL_SLOPE)
     return illuminate(normal, diamond_material, *LIGHT_SOURCES)
 
 
-def _new_elem_diamond() -> EtreeElement:
-    """Create a `g` element for the green diamond.
+class Diamond(NamedTuple):
+    """Control points for the diamond."""
 
-    :return: `g` element with `path` elements for the diamond outline, diamond face,
-        and diamond bevels
+    ol: list[tuple[float, float]]
+    face: list[tuple[float, float]]
+    q1: list[tuple[float, float]]
+    q2: list[tuple[float, float]]
+    q3: list[tuple[float, float]]
+    q4: list[tuple[float, float]]
+
+
+def new_cpts_diamond() -> Diamond:
+    """Get the control points for the diamond.
+
+    :return: [(x1, y1), (x2, y2), (x3, y3), (x4, y4)]
     """
+    outline = get_polygon_union(
+        gap_polygon(diamond_outer, _STROKE_WIDTH), letter_m_mask, negative={1}
+    )
     face = _new_diamond_points(_ID / 2)
-    face_d = _subtract_m(face)
-
-    oline_d = _subtract_m(gap_polygon(diamond_outer, _STROKE_WIDTH))
-
-    diamond = su.new_element("g", id_="diamond")
-    add_path = ft.partial(su.new_sub_element, diamond, "path")
-    _ = add_path(id_="diamond_outline", d=oline_d, fill=shared.K_STROKE)
-    _ = add_path(id_="diamond_face", d=face_d, fill=shared.VIM_GREEN)
-
+    bevels: list[list[tuple[float, float]]] = []
     for i in range(4):
         j = (i + 1) % 4
-        bevel = [face[i], face[j], diamond_outer[j], diamond_outer[i]]
-        bevel_d = _subtract_m(bevel)
-        _ = add_path(
-            id_=f"diamond_bevel_{i}",
-            d=bevel_d,
-            fill=_illuminate_bevel(bevel),
-            **shared.PIN_STROKE,
-        )
-    return diamond
+        bevels.append([face[j], face[i], diamond_outer[i], diamond_outer[j]])
+    sw = shared.PIN_STROKE_WIDTH / 2
+    return Diamond(
+        ol=outline[0],
+        face=gap_polygon(_new_diamond_points(_ID / 2), -sw),
+        q1=gap_polygon(bevels[1], -sw),
+        q2=gap_polygon(bevels[0], -sw),
+        q3=gap_polygon(bevels[3], -sw),
+        q4=gap_polygon(bevels[2], -sw),
+    )
 
 
-diamond = _new_elem_diamond()
+diamond_cpts = new_cpts_diamond()
