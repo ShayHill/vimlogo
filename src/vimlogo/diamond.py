@@ -20,7 +20,7 @@ from basic_colormath import rgb_to_hex
 from vimlogo import params_diamond as params
 from vimlogo import shared
 from vimlogo.glyphs import gap_polygon, get_polygon_union
-from vimlogo.gooch_shading import Material
+from vimlogo.illuminate import Material
 from vimlogo.letters_im import letter_m_mask
 from vimlogo.params_diamond import LIGHT_LOCATION
 
@@ -48,7 +48,7 @@ diamond_material = Material(
     cool_color_ratio=params.DIAMOND_MATERIAL_COOL_COLOR_RATIO,
     warm_color_ratio=params.DIAMOND_MATERIAL_WARM_COLOR_RATIO,
     cool_lum_scalar=params.DIAMOND_MATERIAL_COOL_LUM_SCALAR,
-    warm_lum_scalar=params.DIAMOND_MATERIAL_WARM_LUM_SCALAR
+    warm_lum_scalar=params.DIAMOND_MATERIAL_WARM_LUM_SCALAR,
 )
 
 diamond_shader = diamond_material.new_shader(LIGHT_LOCATION)

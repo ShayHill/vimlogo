@@ -99,7 +99,6 @@ def _get_translation() -> tuple[float, float]:
     return vec2.vadd(shared.VIEW_CENTER, ref_camera_to_m0)
 
 
-
 _IM_SCALE = _get_scale()
 _IM_TRANSLATION = _get_translation()
 IM_STROKE_WIDTH = (get_dims(ref_m_oline)[1] - get_dims(ref_m)[1]) / 2

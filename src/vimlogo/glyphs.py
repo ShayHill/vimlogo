@@ -72,5 +72,3 @@ def gap_polygon(
         produce more than one polygon if you have bowties or holes.
     """
     return [x.xsect for x in offset_polygon(pts, -gap)]
-
-

@@ -12,6 +12,7 @@ from pathlib import Path
 import svg_ultralight as su
 from basic_colormath import rgb_to_hex
 from lxml.etree import _Element as EtreeElement  # pyright: ignore[reportPrivateUsage]
+from svg_path_data import get_cpts_from_svgd
 from svg_ultralight import new_metadata
 
 from vimlogo import params_diamond, shared
@@ -95,13 +96,19 @@ def _new_outlines() -> EtreeElement:
 def _sub_vim(cpts: list[tuple[float, float]]) -> list[list[tuple[float, float]]]:
     """Subtract the V and im mask from the given polygon points."""
     return get_polygon_union(
-        cpts, im_cpts.mask_outline, *im_cpts.outlines, v_cpts.ol, negative={1, 2, 3, 4, 5}
+        cpts,
+        im_cpts.mask_outline,
+        *im_cpts.outlines,
+        v_cpts.ol,
+        negative={1, 2, 3, 4, 5},
     )
 
 
 def _sub_im(cpts: list[tuple[float, float]]) -> list[list[tuple[float, float]]]:
     """Subtract the im mask from the given polygon points."""
-    return get_polygon_union(cpts, im_cpts.mask_outline, *im_cpts.outlines, negative={1, 2, 3, 4})
+    return get_polygon_union(
+        cpts, im_cpts.mask_outline, *im_cpts.outlines, negative={1, 2, 3, 4}
+    )
 
 
 def _new_diamond_face() -> EtreeElement:
@@ -144,14 +151,45 @@ def _new_lit_bevels() -> EtreeElement:
     return su.new_element("path", id_="lit_bevels", d=svgd, fill=shared.GRAY_LIT)
 
 
+def _get_logo_bounds(*elems: EtreeElement) -> su.BoundingBox:
+    """Return a square bounding box centered on the diamond.
+
+    :param elems: the all elements in the svg (will be flat in this project).
+    :return: bounding box around the entire logo
+
+    As long as the logo is built the way it's always been built, the diamond will be
+    the max extent of the logo on all sides, but the `im` is close, and this function
+    allows for broader parameterization.
+    """
+    all_cpts: list[tuple[float, float]] = []
+    for elem in elems:
+        cpts = get_cpts_from_svgd(elem.attrib.get("d", ""))
+        all_cpts.extend((x, y) for p in cpts for x, y in p)
+    xs: tuple[float, ...]
+    ys: tuple[float, ...]
+    xs, ys = zip(*all_cpts, strict=True)
+    min_x, max_x = min(xs), max(xs)
+    min_y, max_y = min(ys), max(ys)
+    max_ext = max(
+        max_x - shared.VIEW_CENTER[0],
+        max_y - shared.VIEW_CENTER[1],
+        shared.VIEW_CENTER[0] - min_x,
+        shared.VIEW_CENTER[1] - min_y,
+    )
+    return su.BoundingBox(
+        shared.VIEW_CENTER[0] - max_ext,
+        shared.VIEW_CENTER[1] - max_ext,
+        max_ext * 2,
+        max_ext * 2,
+    )
+
+
 def write_vim_logo(output_path: Path | str = OUTPUT / "vimlogo.svg") -> None:
     """Write the vim logo to a file.
 
     :param output_path: path to write the svg to
     """
-    bbox = su.pad_bbox(su.BoundingBox(*shared.VIEWBOX), shared.PAD)
     elems = [
-        bbox,
         _extract_metadata(),
         _new_background(),
         _new_outlines(),
@@ -161,7 +199,8 @@ def write_vim_logo(output_path: Path | str = OUTPUT / "vimlogo.svg") -> None:
         _new_dim_bevels(),
         _new_lit_bevels(),
     ]
-    root = su.new_svg_root_around_bounds(*elems)
+    bbox = su.pad_bbox(_get_logo_bounds(*elems), shared.PAD)
+    root = su.new_svg_root_around_bounds(bbox, *elems)
     _ = sys.stdout.write("Writing svg to " + str(output_path) + "\n")
     _ = su.write_svg(output_path, root)
 
