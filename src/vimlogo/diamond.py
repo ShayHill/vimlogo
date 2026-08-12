@@ -12,51 +12,17 @@ right way to do it.
 :created: 2023-12-30
 """
 
-from __future__ import annotations
-
-from typing import TYPE_CHECKING, NamedTuple
+from typing import NamedTuple
 
 import vec2_math as vec2
+from basic_colormath import rgb_to_hex
 
 from vimlogo import params_diamond as params
-from vimlogo import shared, vec3
+from vimlogo import shared
 from vimlogo.glyphs import gap_polygon, get_polygon_union
-from vimlogo.illumination import LIGHT_SOURCES, diamond_material, illuminate
+from vimlogo.gooch_shading import Material
 from vimlogo.letters_im import letter_m_mask
-
-if TYPE_CHECKING:
-    from vimlogo.vec3 import Vec3
-
-
-_BEVEL_SLOPE = params.BEVEL_SLOPE
-_OD = params.OD
-_ID = params.ID
-_STROKE_WIDTH = params.STROKE_WIDTH
-
-
-def _get_bevel_surface_normal(
-    pnt_a2: tuple[float, float], pnt_b2: tuple[float, float], slope: float
-) -> Vec3:
-    """Calculate the surface normal of a bevel.
-
-    :param pnt_a2: one point on the inside edge of the bevel (xy plane)
-    :param pnt_b2: point clockwise from pnt_a on the inside edge of the bevel
-        (xy plane)
-    :param slope: slope of the bevel. This is the slope of the bevels from outside
-        in, so a positive number.
-
-    Faces are defined clockwise in a right-handed coordinate system.
-    """
-    vec_ab2 = vec2.vsub(pnt_a2, pnt_b2)
-    vec_ac2 = vec2.set_norm(vec2.qrotate(vec_ab2, 3))
-    pnt_c_xy = vec2.vadd(pnt_a2, vec_ac2)
-
-    pnt_a3 = (*pnt_a2, 0)
-    pnt_c3 = (*pnt_c_xy, slope)
-    vec_ab3 = (*vec_ab2, 0)
-    vec_ac3 = vec3.normalize(vec3.subtract(pnt_c3, pnt_a3))
-
-    return vec3.normalize(vec3.cross(vec_ac3, vec_ab3))
+from vimlogo.params_diamond import LIGHT_LOCATION
 
 
 def _new_diamond_points(rad: float) -> list[tuple[float, float]]:
@@ -72,17 +38,20 @@ def _new_diamond_points(rad: float) -> list[tuple[float, float]]:
 
 
 # this value is used elsewhere to build the background
-diamond_outer = _new_diamond_points(_OD / 2)
+diamond_outer = _new_diamond_points(params.OD / 2)
 
 
-def _subtract_m(pts: list[tuple[float, float]]) -> str:
-    """Subtract the letter_m_mask from a polygon.
+diamond_material = Material(
+    base=params.DIAMOND_MATERIAL_BASE,
+    cool=params.DIAMOND_MATERIAL_COOL,
+    warm=params.DIAMOND_MATERIAL_WARM,
+    cool_color_ratio=params.DIAMOND_MATERIAL_COOL_COLOR_RATIO,
+    warm_color_ratio=params.DIAMOND_MATERIAL_WARM_COLOR_RATIO,
+    cool_lum_scalar=params.DIAMOND_MATERIAL_COOL_LUM_SCALAR,
+    warm_lum_scalar=params.DIAMOND_MATERIAL_WARM_LUM_SCALAR
+)
 
-    :param pts: xy polygon points
-    :return: path data string with the letter_m_mask subtracted from it
-    """
-    paths = get_polygon_union(pts, letter_m_pts_mask, negative={1})
-    return new_data_string(*paths)
+diamond_shader = diamond_material.new_shader(LIGHT_LOCATION)
 
 
 def illuminate_bevel(pts: list[tuple[float, float]]) -> str:
@@ -91,8 +60,9 @@ def illuminate_bevel(pts: list[tuple[float, float]]) -> str:
     :param pts: xy polygon points
     :return: hex color of the illuminated bevel
     """
-    normal = _get_bevel_surface_normal(pts[1], pts[0], _BEVEL_SLOPE)
-    return illuminate(normal, diamond_material, *LIGHT_SOURCES)
+    normal_x, normal_y = vec2.qrotate(vec2.vsub(pts[0], pts[1]), 1)
+    normal = (normal_x, normal_y, 0)
+    return rgb_to_hex(diamond_shader(normal))
 
 
 class Diamond(NamedTuple):
@@ -106,15 +76,18 @@ class Diamond(NamedTuple):
     q4: list[tuple[float, float]]
 
 
-def new_cpts_diamond() -> Diamond:
+def _new_diamond() -> Diamond:
     """Get the control points for the diamond.
 
     :return: [(x1, y1), (x2, y2), (x3, y3), (x4, y4)]
     """
     outline = get_polygon_union(
-        gap_polygon(diamond_outer, _STROKE_WIDTH), letter_m_mask, negative={1}
+        gap_polygon(diamond_outer, params.STROKE_WIDTH),
+        letter_m_mask,
+        negative={1},
+        # gap_polygon(diamond_outer, 0), letter_m_mask, negative={1}
     )
-    face = _new_diamond_points(_ID / 2)
+    face = _new_diamond_points(params.ID / 2)
     bevels: list[list[tuple[float, float]]] = []
     for i in range(4):
         j = (i + 1) % 4
@@ -122,7 +95,7 @@ def new_cpts_diamond() -> Diamond:
     sw = shared.PIN_STROKE_WIDTH / 2
     return Diamond(
         ol=outline[0],
-        face=gap_polygon(_new_diamond_points(_ID / 2), -sw),
+        face=gap_polygon(_new_diamond_points(params.ID / 2), -sw),
         q1=gap_polygon(bevels[1], -sw),
         q2=gap_polygon(bevels[0], -sw),
         q3=gap_polygon(bevels[3], -sw),
@@ -130,4 +103,4 @@ def new_cpts_diamond() -> Diamond:
     )
 
 
-diamond_cpts = new_cpts_diamond()
+diamond_cpts = _new_diamond()

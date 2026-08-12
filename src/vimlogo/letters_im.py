@@ -99,6 +99,7 @@ def _get_translation() -> tuple[float, float]:
     return vec2.vadd(shared.VIEW_CENTER, ref_camera_to_m0)
 
 
+
 _IM_SCALE = _get_scale()
 _IM_TRANSLATION = _get_translation()
 IM_STROKE_WIDTH = (get_dims(ref_m_oline)[1] - get_dims(ref_m)[1]) / 2
@@ -124,8 +125,8 @@ letter_i_dot = _transform_points(letter_i_dot)
 class LetterIM(NamedTuple):
     """A named tuple for the letters i and m in Vim."""
 
-    ols: list[list[tuple[float, float]]]
-    mask_ol: list[tuple[float, float]]
+    outlines: list[list[tuple[float, float]]]
+    mask_outline: list[tuple[float, float]]
     faces: list[list[tuple[float, float]]]
 
 
@@ -133,7 +134,7 @@ def _new_letters_im() -> LetterIM:
     point_lists = [letter_i_stem, letter_i_dot, letter_m_pts]
     im_oline = [gap_polygon(pts, IM_STROKE_WIDTH) for pts in point_lists]
     mask_ol = gap_polygon(letter_m_mask, IM_STROKE_WIDTH)
-    return LetterIM(ols=im_oline, mask_ol=mask_ol, faces=point_lists)
+    return LetterIM(outlines=im_oline, mask_outline=mask_ol, faces=point_lists)
 
 
 im_cpts = _new_letters_im()

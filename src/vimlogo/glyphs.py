@@ -13,8 +13,7 @@ from __future__ import annotations
 from typing import Any
 
 from cubic_bezier_spline import new_closed_linear_spline
-from offset_poly import offset_poly_per_edge, offset_polygon
-from offset_poly.offset import PolyType
+from offset_poly import offset_polygon
 from shapely.geometry import Polygon
 from shapely.ops import unary_union
 from shapely.validation import make_valid
@@ -75,16 +74,3 @@ def gap_polygon(
     return [x.xsect for x in offset_polygon(pts, -gap)]
 
 
-def gap_polygon_per_edge(
-    pts: list[tuple[float, float]], gaps: list[float]
-) -> list[tuple[float, float]]:
-    """Gap a polygon per edge.
-
-    :param pts: list of (x, y) points in a linear spline.
-    :param gaps: list of distances to gap the polygon per edge.
-    :return: list of lists of (x, y) points in a linear spline. Gapping a polygon can
-        produce more than one polygon if you have bowties or holes.
-    """
-    return [
-        x.xsect for x in offset_poly_per_edge(pts, [-g for g in gaps], PolyType.POLYGON)
-    ]

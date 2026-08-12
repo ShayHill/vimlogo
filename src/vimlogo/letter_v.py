@@ -164,7 +164,7 @@ OUTER_AB = 9615 / 96  # 100.15625
 # the outer height of the left, top serif of the V.
 # Justification: In the reference SVG, 28.4375 appears twice. This is the outside
 # height of the left, top serif of the V AND the distance between the inner top of
-# the right serif and the top of the innder right diagonal of the V (the vertical
+# the right serif and the top of the inner right diagonal of the V (the vertical
 # distance between inner points F and I. For what it's worth, 28.4375 * 96 (ppi of
 # the reference SVG) is an integer: 2730.
 OUTER_BC = 2730 / 96  # 28.4375
@@ -347,8 +347,6 @@ def _get_translated_v_outlines() -> tuple[
 v_inner, v_outer = _get_translated_v_outlines()
 
 
-
-
 class LetterV(NamedTuple):
     """A named tuple for the letters i and m in Vim."""
 
@@ -361,10 +359,10 @@ class LetterV(NamedTuple):
 
 
 def _new_letter_v() -> LetterV:
-    oline_bevels = [-LRG_BEV] * len(v_outer)
-    oline_bevels[18] = -BEVEL_MN
+    outline_widths = [-LRG_BEV] * len(v_outer)
+    outline_widths[18] = -BEVEL_MN  # left vertical V stroke
     oline = [
-        x.xsect for x in offset_poly_per_edge(v_outer, oline_bevels, PolyType.POLYGON)
+        x.xsect for x in offset_poly_per_edge(v_outer, outline_widths, PolyType.POLYGON)
     ]
     sw = shared.PIN_STROKE_WIDTH / 2
     lit_bevels = [
@@ -387,7 +385,6 @@ def _new_letter_v() -> LetterV:
         face=gap_polygon(v_inner, -sw),
         dim_bevels=[gap_polygon(x, -sw) for x in dim_bevels],
         lit_bevels=[gap_polygon(x, -sw) for x in lit_bevels],
-        # dim_bevels =dim_bevels
     )
 
 

@@ -17,16 +17,6 @@ from vimlogo.reference_paths import (
 )
 
 # ===============================================================================
-#   dimensions and parameters hand-tuned
-# ===============================================================================
-
-
-# effects the calculated surface normal of the bevels and thus the illumination.
-# Increase this to maked the bevels less colorful.
-BEVEL_SLOPE = 1.5
-
-
-# ===============================================================================
 #   dimensions and parameters inferred from reference image
 # ===============================================================================
 
@@ -41,3 +31,15 @@ ID = sum(get_dims(ref_diamond_inner)) / 2
 # itself, not a stroke of a polygon.
 _SD = sum(get_dims(ref_diamond_oline)) / 2
 STROKE_WIDTH = (_SD - OD) / pow(2, 1 / 2) / 2
+
+LIGHT_LOCATION = (-1, -2, 0)
+
+VIM_GREEN = "#009933"
+
+DIAMOND_MATERIAL_BASE = VIM_GREEN
+DIAMOND_MATERIAL_COOL = "#0000ff"
+DIAMOND_MATERIAL_WARM = "#ffff00"
+DIAMOND_MATERIAL_COOL_COLOR_RATIO = 0.25
+DIAMOND_MATERIAL_WARM_COLOR_RATIO = 0.75
+DIAMOND_MATERIAL_COOL_LUM_SCALAR = 3 / 4
+DIAMOND_MATERIAL_WARM_LUM_SCALAR = 5 / 3
