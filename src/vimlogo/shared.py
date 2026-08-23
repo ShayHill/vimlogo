@@ -13,6 +13,7 @@ from vimlogo.reference_paths import (
 )
 
 BACKGROUND_COLOR = "#ffffff"
+BACKGROUND_OPACITY = 0.7
 OUTLINE_COLOR = "#000000"
 
 # Read the width of the white background stripe around the logo from the reference

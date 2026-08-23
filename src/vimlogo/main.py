@@ -77,9 +77,10 @@ def _new_background() -> EtreeElement:
     ]
     background_paths = get_polygon_union(*background, ltr_m)
     svgd = new_data_string(*background_paths)
-    return su.new_element(
-        "path", id_="background", d=svgd, fill=shared.BACKGROUND_COLOR
-    )
+    fill: dict[str, str | float] = {"fill": shared.BACKGROUND_COLOR}
+    if shared.BACKGROUND_OPACITY != 1:
+        fill["opacity"] = shared.BACKGROUND_OPACITY
+    return su.new_element("path", id_="background", d=svgd, **fill)
 
 
 def _new_outlines() -> EtreeElement:
